@@ -17,3 +17,13 @@ class Accounts(models.Model):
 
     class Meta:
         db_table = "accounts"
+
+
+class Captured(models.Model):
+    userid = models.ForeignKey(Accounts, on_delete=models.CASCADE)
+    captured = models.FileField()
+    file_path = models.FilePathField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "captured"

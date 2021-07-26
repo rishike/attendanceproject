@@ -11,6 +11,9 @@ import uuid
 from .forms import AddUserForm, LoginForm
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
 
 # Create your views here.
 
@@ -20,7 +23,6 @@ def check_session(request):
     if 'username' in request.session and 'typ' in request.session and 'name' in request.session:
         context_data = dict()
         context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], request.session['type'], request.session['name']
-        print(context_data)
         return context_data
     return False
 
@@ -145,10 +147,13 @@ class AllUserListView(View):
 class UserListView(View):
     template_name = "accounts/profile.html"
 
-    def get(self, request, **kwargs):
+    def get(self, request, username):
         context_data = check_session(request)
         if context_data:
+            profile_obj = get_object_or_404(Accounts, username=username)
+            context_data['profile_name'] = profile_obj.name
             return render(request, self.template_name, context_data)
+
         return redirect('accounts:login')
 
     def get_context_data(self, **kwargs):
@@ -156,23 +161,23 @@ class UserListView(View):
         return context
 
 
-
 class CaptureView(View):
     face_cascade = cv.CascadeClassifier("data/haarcascade_frontalface_alt.xml")
     eyes_cascade = cv.CascadeClassifier("data/haarcascade_eye_tree_eyeglasses.xml")
+    img_file_path = os.path.join(settings.BASE_DIR, "capture")
 
     def detect_and_capture(self, frame):
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         frame_gray = cv.equalizeHist(frame_gray)
 
         # -- Detect Faces
-        faces = self.face_cascade.detectMultiScale(frame_gray, scaleFactor=1.5, minNeighbors=1)
+        faces = self.face_cascade.detectMultiScale(frame_gray, scaleFactor=1.5, minNeighbors=5)
         for (x, y, w, h) in faces:
             center = (x + w // 2, y + h // 2)
-            frame = cv.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 3)
+            face_frame = cv.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 3)
 
             face_roi = frame_gray[y:y + h, x:x + w]
-            roi_color = frame[y:y + h, x:x + w]
+            roi_color = face_frame[y:y + h, x:x + w]
 
             # -- In face, detect eyes
             eyes = self.eyes_cascade.detectMultiScale(face_roi)
@@ -182,28 +187,33 @@ class CaptureView(View):
 
     def get(self, request):
         cap = cv.VideoCapture(0)
+        rand_img_name = uuid.uuid4().hex
         if cap.isOpened():
             while cap.isOpened():
                 ret, frame = cap.read()
+                deepcopy = frame
                 if frame is None:
                     return JsonResponse({
                         "msg": "No captured frame",
-                        "status": 200
+                        "status": 404
                     }, status=200)
+
                 self.detect_and_capture(frame)
                 if cv.waitKey(25) & 0xff == ord('q'):
                     break
                 if cv.waitKey(25) & 0xff == ord('c'):
-                    cv.imwrite(str(uuid.uuid4().hex) + ".png", frame)
+                    cv.imwrite(f"{self.img_file_path}\{rand_img_name}.png", frame)
+                    break
             cap.release()
             cv.destroyAllWindows()
 
             return JsonResponse({
                 "msg": "successfully captured",
-                "status": 200
+                "status": 301,
+                "file_name": rand_img_name+".png"
             }, status=200)
         else:
             return JsonResponse({
-                "msg": "webcam not found",
-                "status": 200
+                "msg": "camera not found, make sure camera is installed on your system",
+                "status": 404
             }, status=200)

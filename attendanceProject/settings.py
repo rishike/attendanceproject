@@ -123,6 +123,10 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "public"),
 )
 
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "capture")
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 

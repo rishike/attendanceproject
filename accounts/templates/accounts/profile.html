@@ -2,40 +2,30 @@
 
 {% block content %}
 
-<style>
-	.profile-pic{
-		max-width: 200px;
-		max-height:200px;
-		margin: 0 auto;
-		border-radius: 50%;
-	}
-</style>
     <div class="container mt-5">
-
-        <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-primary">Train my image</button>
-        </div>
+<!--        <div class="d-flex justify-content-end">-->
+<!--            <button type="button" class="btn btn-primary">Train my image</button>-->
+<!--        </div>-->
         <hr>
         <div class="row">
             <div class="col-md-3">
                 <div class="card card-body">
 
-                    <h3 style="text-align: center">User Profile Pic</h3>
+                    <h3 style="text-align: center">{{ profile_name|capfirst }}</h3>
                     <hr>
-                    <img class="img-responsive profile-pic" src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" >
+                    <img class="img-responsive profile-pic" id="frame" src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" >
                     <hr>
                     <div class="mb-3 text-center">
-                        <button type="button" class="btn btn-primary">Capture Image </button>
+                        <button type="button" id="capture" class="btn btn-primary">Capture and Train Image </button>
                     </div>
-                         <p class="text-center">OR</p>
-                    <hr>
-                    <div class="mb-3">
-                <label for="formFile" class="form-label">Upload User picture </label>
-                <input class="form-control" type="file" id="formFile">
-                    </div>
-                     <div class="mb-3 text-center">
-                        <button type="button" class="btn btn-primary">Upload</button>
-                </div>
+
+<!--                    <div class="mb-3">-->
+<!--                <label for="formFile" class="form-label">Upload User picture </label>-->
+<!--                <input class="form-control" type="file" id="formFile">-->
+<!--                    </div>-->
+<!--                     <div class="mb-3 text-center">-->
+<!--                        <button type="button" class="btn btn-primary">Upload</button>-->
+<!--                </div>-->
                     <br />
                 </div>
 
