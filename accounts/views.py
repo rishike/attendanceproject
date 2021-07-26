@@ -14,7 +14,6 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
-
 # Create your views here.
 
 
@@ -191,18 +190,16 @@ class CaptureView(View):
         if cap.isOpened():
             while cap.isOpened():
                 ret, frame = cap.read()
-                deepcopy = frame
                 if frame is None:
                     return JsonResponse({
                         "msg": "No captured frame",
                         "status": 404
                     }, status=200)
-
+                cv.imwrite(f"{self.img_file_path}\{rand_img_name}.png", frame)
                 self.detect_and_capture(frame)
                 if cv.waitKey(25) & 0xff == ord('q'):
                     break
                 if cv.waitKey(25) & 0xff == ord('c'):
-                    cv.imwrite(f"{self.img_file_path}\{rand_img_name}.png", frame)
                     break
             cap.release()
             cv.destroyAllWindows()
