@@ -1,0 +1,60 @@
+{% extends "main.html" %}
+{% block style %}
+<style>
+.login-form{
+    padding: 5%;
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+    <br>
+   <div class="row justify-content-center mt-5">
+    <div class="row col-md-12 justify-content-center mt-5">
+
+        <div class="col-md-12 justify-content-center text-center">
+            <img src="" width="50" alt="">
+        </div>
+        <div class="col-md-12 text-center">
+            <h1>Login</h1>
+            {% if error %}
+    <h4>Your email and password didn't match. Please try again.</h4>
+{% endif %}
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-sm-12">
+
+        <form method="post" action="">
+             {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" class="form-control" name="email" aria-describedby="emailHelp" required="" id="email">
+                <p class="text-error text-danger">
+                    {% if email_error %}
+                        {{ email_error }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" name="password" required="" id="password">
+                 <p class="text-error text-danger">
+                    {% if password_error %}
+                        {{ password_error }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger btn-block">Login</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+{% endblock %}

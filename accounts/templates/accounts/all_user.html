@@ -1,0 +1,56 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <div class="container">
+    <div class="d-flex mt-4">
+        <h3 class="title">All User List</h3>
+    </div>
+    <hr>
+    <div class="row my-4 card shadow">
+        <div class="col card-body">
+            <table class="table table-striped" id="userListingTable">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Created On</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for obj in userobj %}
+                    <tr>
+                        <th scope="row">{{ obj.name }}</th>
+                        <td>{{ obj.email }}</td>
+                        <td>{{ obj.type }}</td>
+                        <td>
+                            {% if obj %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger">InActive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ obj.created_at|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="{% url 'accounts:profile' username=obj.username  %}" class="btn btn-sm btn-success">
+                                  <i class="fa fa-pen"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="mt-5">
+                        <td colspan="7" align="center">
+                            <p>No User found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
