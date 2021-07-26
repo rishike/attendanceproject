@@ -1,0 +1,94 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<style>
+	.profile-pic{
+		max-width: 200px;
+		max-height:200px;
+		margin: 0 auto;
+		border-radius: 50%;
+	}
+</style>
+    <div class="container mt-5">
+
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-primary">Train my image</button>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card card-body">
+
+                    <h3 style="text-align: center">User Profile Pic</h3>
+                    <hr>
+                    <img class="img-responsive profile-pic" src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" >
+                    <hr>
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-primary">Capture Image </button>
+                    </div>
+                         <p class="text-center">OR</p>
+                    <hr>
+                    <div class="mb-3">
+                <label for="formFile" class="form-label">Upload User picture </label>
+                <input class="form-control" type="file" id="formFile">
+                    </div>
+                     <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-primary">Upload</button>
+                </div>
+                    <br />
+                </div>
+
+            </div>
+            <div class="col-md-9">
+                <form action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                <label for="username">Username<span class="link-danger">*</span></label>
+                <input type="text" class="form-control" name="username" aria-describedby="usernameHelp" required="" id="username">
+                <p class="text-error text-danger">
+                    {% if form.username.errors %}
+                        {{ form.username.errors.as_text }}
+                    {% endif %}
+                </p>
+            </div>
+
+             <div class="form-group">
+                <label for="name">User Full Name<span class="link-danger">*</span></label>
+                <input type="text" class="form-control" name="name" aria-describedby="nameHelp" required="" id="name">
+                <p class="text-error text-danger">
+                    {% if form.name.errors %}
+                        {{ form.name.errors.as_text }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="form-group">
+                <label for="password">User Password<span class="link-danger">*</span></label>
+                <input type="password" class="form-control" name="password" required="" id="password" aria-describedby="passwordHelp">
+                <p class="text-error text-danger">
+                    {% if form.password.errors %}
+                        {{ form.password.errors.as_text }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="form-group">
+                <label for="type">User Type<span class="link-danger">*</span></label>
+                <select class="form-control" id="type" name="type">
+                  <option value="">Select User Type</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Standard User">Standard User</option>
+            </select>
+            <p class="text-error text-danger">
+                    {% if form.type.errors %}
+                        {{ form.type.errors.as_text }}
+                    {% endif %}
+                </p>
+        </div>
+
+                    <input class="btn btn-primary" type="submit" name="Update" value="update">
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

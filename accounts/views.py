@@ -142,8 +142,14 @@ class AllUserListView(View):
         return redirect('accounts:login')
 
 
-class UserListView(ListView):
-    template_name = "accounts/all_user.html"
+class UserListView(View):
+    template_name = "accounts/profile.html"
+
+    def get(self, request, **kwargs):
+        context_data = check_session(request)
+        if context_data:
+            return render(request, self.template_name, context_data)
+        return redirect('accounts:login')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
