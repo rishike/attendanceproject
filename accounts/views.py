@@ -21,7 +21,7 @@ def check_session(request):
 
     if 'username' in request.session and 'typ' in request.session and 'name' in request.session:
         context_data = dict()
-        context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], request.session['type'], request.session['name']
+        context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], request.session['typ'], request.session['name']
         return context_data
     return False
 
@@ -195,7 +195,7 @@ class CaptureView(View):
                         "msg": "No captured frame",
                         "status": 404
                     }, status=200)
-                cv.imwrite(f"{self.img_file_path}\{rand_img_name}.png", frame)
+                # cv.imwrite(f"{self.img_file_path}\{rand_img_name}.png", frame)
                 self.detect_and_capture(frame)
                 if cv.waitKey(25) & 0xff == ord('q'):
                     break

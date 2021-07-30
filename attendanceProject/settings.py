@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'dashboard',
     'accounts'
 ]
@@ -77,7 +76,7 @@ WSGI_APPLICATION = 'attendanceProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'attendance',
+        'NAME': 'test2',
         'USER': 'root',
         'PASSWORD': ''
     }
@@ -133,3 +132,7 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+PROTO_PATH = os.path.join(BASE_DIR, "model", "deploy.prototxt")
+CAFFE_MODEL_PATH = os.path.join(BASE_DIR, "model", "res10_300x300_ssd_iter_140000.caffemodel")
+RECOGNITION_MODEL = os.path.join(BASE_DIR, "model", 'openface_nn4.small2.v1.t7')

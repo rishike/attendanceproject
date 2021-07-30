@@ -1,0 +1,39 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-3">
+        <div class="card" style="width: 18rem;">
+          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance">
+            <!-- Button trigger modal -->
+            <div class="card-body text-center">
+                <button type="button" class="btn btn-success"  data-bs-toggle="modal" data-bs-target="#attendanceModal">Mark My attendance</button>
+  </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Modal -->
+<div class="modal fade" id="attendanceModal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="attendanceModalLabel">Enter email</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          {% csrf_token %}
+        <input type="email" class="form-control" name="email" aria-describedby="emailHelp" required="" id="email">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="checkEmail" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
