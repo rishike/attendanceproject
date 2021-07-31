@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'attendanceProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test',
+        'NAME': 'attendance',
         'USER': 'root',
         'PASSWORD': ''
     }
