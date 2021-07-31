@@ -2,26 +2,29 @@ from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
-from .models import Accounts
+from .models import Accounts, Captured
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.core.validators import EmailValidator
 import cv2 as cv
 import uuid
-from .forms import AddUserForm, LoginForm
+from .forms import AddUserForm, LoginForm, CapturedForm
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
+
+
 # Create your views here.
 
 
 def check_session(request):
-
     if 'username' in request.session and 'typ' in request.session and 'name' in request.session:
         context_data = dict()
-        context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], request.session['typ'], request.session['name']
+        context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], \
+                                                                              request.session['typ'], request.session[
+                                                                                  'name']
         return context_data
     return False
 
@@ -34,6 +37,46 @@ def logout(request):
     except:
         return redirect('accounts:login')
     return redirect('accounts:login')
+
+
+def upload_file(request):
+    form = CapturedForm(request.POST, request.FILES)
+    username = "rishi"
+    if request.is_ajax():
+        if form.is_valid():
+            img_file = request.FILES['captured']
+            filename = img_file.name
+            print(img_file)
+            pth = os.path.join(settings.MEDIA_ROOT, "rishi", filename)
+            with open(pth, "wb") as fp:
+                for chunk in img_file.chunks():
+                    fp.write(chunk)
+
+            Captured.objects.create(
+                userid=Accounts.objects.filter(username=username)[0],
+                captured=filename,
+                file_path=pth
+            )
+
+            return JsonResponse({'message': 'success'}, status=200)
+    return JsonResponse({'message': 'fail'}, status=200)
+
+
+class UploadImageView(View):
+    template_name = "accounts/upload_image.html"
+
+    # def post(self, request, **kwargs):
+    #     form = CapturedForm(request.POST or None, request.FILES or None)
+    #     if request.is_ajax():
+    #         if form.is_valid():
+    #             print(form.save())
+    #     return JsonResponse({
+    #         'message': 'success'
+    #     },status=200)
+
+    def get(self, request, **kwargs):
+        context_data = {}
+        return render(request, template_name=self.template_name, context=context_data)
 
 
 class LoginView(View):
@@ -207,7 +250,7 @@ class CaptureView(View):
             return JsonResponse({
                 "msg": "successfully captured",
                 "status": 301,
-                "file_name": rand_img_name+".png"
+                "file_name": rand_img_name + ".png"
             }, status=200)
         else:
             return JsonResponse({

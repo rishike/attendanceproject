@@ -1,0 +1,116 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <div class="row">
+<div class="md-6 justify-content-center text-center">
+    <div class="alert alert-success mt-5 bt-5" role="alert">
+            Please Upload Your at least four Picture with different sides of your faces.
+</div>
+</div>
+    </div>
+          	<div class="row">
+	  <div class="col-md-6">
+          <p class="title">Use webcam to upload your picture</p>
+          <div class="card">
+  <div class="card-body text-center">
+      <div id="status"></div>
+    <button class="btn btn-outline-danger btn-lg" id="frameCaptured">Captured</button>
+      <video id="output" width=640 height=480 style="max-width: 100%"></video>
+      <button id="addImageButton"  class="btn btn-info" disabled="true">Get a picture</button>
+      <table>
+    <tr id="targetImgs"></tr>
+    <tr id="targetNames"></tr>
+  </table>
+  </div>
+</div>
+	  </div>
+	   <div class="col-md-6">
+    <form action="" id="upload-form">
+            {% csrf_token %}
+            <div id="alert-box"></div>
+              <div class="form-group files color">
+                <label>Upload Your File </label>
+                <input name="captured" type="file" class="form-control" accept="image/*" oninput="" id="id_image">
+              </div>
+        </form>
+           <hr>
+           <div id="image-box" class=""></div>
+           <div id="progress-box" class="progress d-none"></div>
+        <br/>
+           <div id="cancel-box" class="d-none">
+               <button id="cancel-btn" type="button" class="btn btn-danger">Cancel</button>
+           </div>
+              <hr>
+              <div class="form-group text-center">
+              <button onclick="" id="manualUpload" class="btn btn-primary">Upload</button>
+	        </div>
+
+        	</div>
+            <script>
+                const uploadForm = document.getElementById("upload-form");
+                const input = document.getElementById("id_image");
+                const alertBox = document.getElementById("alert-box");
+                const imageBox = document.getElementById("image-box");
+                const progressBox = document.getElementById("progress-box");
+                const cancelBox = document.getElementById("cancel-box");
+                const cancelBtn = document.getElementById("cancel-btn");
+                const csrf = document.getElementsByName("csrfmiddlewaretoken");
+                uploadButton = document.getElementById("manualUpload");
+                input.addEventListener('change', () => {
+                       const img_data = input.files[0];
+                       const imgurl = URL.createObjectURL(img_data);
+                       imageBox.innerHTML = `<img src="${imgurl}" width="300px">`;
+                });
+
+                uploadButton.addEventListener('click', () => {
+                    const img_data = input.files[0];
+                     const fd = new FormData();
+                     fd.append('csrfmiddlewaretoken', csrf[0].value);
+                     fd.append('captured', img_data);
+                     let url = "http://127.0.0.1:8000/upload_file/";
+                     $.ajax({
+                        type: 'POST',
+                        url: url,
+                        enctype: 'multipart/form-data',
+                        data: fd,
+                        beforeSend: function() {
+                            alertBox.innerHTML= "";
+                            imageBox.innerHTML = "";
+                        },
+                        xhr: function() {
+                        const xhr = new window.XMLHttpRequest();
+
+                    cancelBtn.addEventListener('click', ()=>{
+                        xhr.abort()
+                        setTimeout(()=>{
+                            uploadForm.reset();
+                            alertBox.innerHTML = ""
+                            cancelBox.classList.add('d-none')
+                        }, 2000)
+                    });
+                    return xhr;
+
+                        },
+                        success: function(response) {
+                              alert("File successfully uploaded");
+                              uploadForm.reset();
+                        },
+                        error: function(error) {
+                            alertBox.innerHTML = `<div class="alert alert-danger" role="alert">
+                                    Ups... something went wrong
+                                </div>`;
+                        },
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                      });
+                });
+
+
+
+            </script>
+
+
+{% endblock %}

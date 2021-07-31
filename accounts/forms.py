@@ -1,6 +1,13 @@
 from django.forms import ModelForm
-from .models import Accounts
+from .models import Accounts, Captured
 from django.core.exceptions import ValidationError
+
+
+class CapturedForm(ModelForm):
+
+    class Meta:
+        model = Captured
+        fields = ['captured']
 
 
 class LoginForm(ModelForm):

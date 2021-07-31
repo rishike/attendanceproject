@@ -1,7 +1,11 @@
 from django.db import models
-
+import os
 
 # Create your models here.
+
+
+def get_upload_path(dirpath, filename):
+    return os.path.join(dirpath, filename)
 
 
 class Accounts(models.Model):
@@ -21,7 +25,7 @@ class Accounts(models.Model):
 
 class Captured(models.Model):
     userid = models.ForeignKey(Accounts, on_delete=models.CASCADE)
-    captured = models.FileField()
+    captured = models.FileField(upload_to=get_upload_path)
     file_path = models.FilePathField()
     created_at = models.DateTimeField(auto_now_add=True)
 

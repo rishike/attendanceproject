@@ -19,13 +19,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from dashboard.views import FirstPageView
 from dashboard.views import CheckEmail
+from accounts.views import upload_file
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', FirstPageView.as_view(), name='FirstPage'),
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('', include('dashboard.urls')),
-    path('validate/', CheckEmail)
+    path('validate/', CheckEmail),
+    path('upload_file/', upload_file)
 ]
 
 if settings.DEBUG:
