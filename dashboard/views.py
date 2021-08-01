@@ -11,7 +11,11 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
 import pathlib
+from datetime import datetime
 
+NOW = datetime.now()
+START_DATE = datetime(NOW.year, NOW.month, NOW.day, hour=00, minute=00, second=00)
+END_DATE = datetime(NOW.year, NOW.month, NOW.day, hour=23, minute=59, second=59)
 
 # Create your views here.
 @require_http_methods(["GET", "POST"])
@@ -81,11 +85,17 @@ class TrainingView(View):
 class MarkAttendanceView(View):
 
     def get(self, request):
-        res = dict()
-        # if request.POST.get('username'):
         res = Recognizer(username='rishi')
-        # if res.get('status') == 11:
-        #     pass
+        if res.get('status') == 11:
+            user = Accounts.objects.filter(username=res['username'])
+
+            if Attendance.objects.filter(userid_id=user[0].id, marked_at__gte=START_DATE, marked_at__lte=END_DATE):
+                res['msg'] = "Attendance has already been marked successfully for " + res['username']
+                return JsonResponse(res, status=200)
+
+            attd = Attendance.objects.create(userid=user[0])
+            attd.save()
+            res['msg'] = "Attendance has been marked successfully for " + res['username']
         return JsonResponse(res, status=200)
 
 
@@ -93,8 +103,11 @@ class FirstPageView(View):
     template_name = "dashboard/first_page.html"
 
     def get(self, request):
-        context_data = {}
-        return render(request, self.template_name, context_data)
+        context_data = check_session(request)
+        if not context_data:
+            return render(request, self.template_name, {})
+        else:
+            return redirect('dashboard:home')
 
 
 class DashboardView(View):

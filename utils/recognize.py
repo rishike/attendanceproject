@@ -60,7 +60,7 @@ def Recognizer(username=None):
                         found = False
 
             if found:
-                res['msg'] = "found"
+                res['found'] = True
                 res['status'] = 11
                 res['username'] = name
                 cv.putText(frame, "press m to mark your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 1)
@@ -74,6 +74,7 @@ def Recognizer(username=None):
             key = cv.waitKey(1) & 0xff
 
             if key == ord('q'):
+                res['status'] = 10
                 break
     else:
         res['msg'] = "Camera not found"
