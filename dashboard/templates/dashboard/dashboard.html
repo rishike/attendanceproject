@@ -1,4 +1,5 @@
 {% extends "main.html" %}
+{% load static %}
 {% block content %}
 
 <div class="container mt-5">
@@ -16,6 +17,15 @@
           <img src="https://payu.darwinbox.in/images/Icons_latest/calendarc-img.png" class="card-img-top" alt="records">
           <div class="card-body text-center">
             <button class="btn btn-success">Attendance History</button>
+          </div>
+      </div>
+    </div>
+
+        <div class="col-3">
+      <div class="card" style="width: 17rem;">
+          <img src="{% static 'img/trainer.png' %}" class="card-img-top" alt="records"   width="200">
+          <div class="card-body text-center">
+            <a href="{% url 'dashboard:training' username=username %}" class="btn btn-success">Train Image Classifier</a>
           </div>
       </div>
     </div>

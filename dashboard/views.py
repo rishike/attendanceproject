@@ -1,12 +1,37 @@
 from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 from django.views import View
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, response
 from utils.recognize import Recognizer
+from utils.training import Training
 from accounts.models import Accounts
 from .models import Attendance
 from django.views.decorators.http import require_http_methods
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+import pathlib
+
+
 # Create your views here.
+@require_http_methods(["GET", "POST"])
+def fetch_processing_image(request, param):
+    if param in request.session:
+        return JsonResponse({
+            param: request.session[param]
+        }, status=200)
+
+    return HttpResponse("fail")
+
+
+def check_session(request):
+    if 'username' in request.session and 'typ' in request.session and 'name' in request.session:
+        context_data = dict()
+        context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], \
+                                                                              request.session['typ'], request.session[
+                                                                                  'name']
+        return context_data
+    return False
 
 
 @require_http_methods(["POST"])
@@ -30,12 +55,37 @@ def CheckEmail(request):
         }, status=200)
 
 
+class TrainingView(View):
+    template_name = "dashboard/training.html"
+
+    def get(self, request, username):
+        context_data = dict()
+        profile_obj = get_object_or_404(Accounts, username=username)
+        pth = os.path.join(settings.MEDIA_ROOT, profile_obj.username)
+        filenames = []
+        for path, subdirs, files in os.walk(pth):
+            for name in files:
+                if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
+                    filenames.append(name)
+        context_data['filenames'] = filenames
+        return render(request, template_name=self.template_name, context=context_data)
+
+    def post(self, request, username):
+        res = Training(request, username)
+        return JsonResponse({
+            'msg': 'success',
+            'status': "200"
+        }, status=200)
+
+
 class MarkAttendanceView(View):
 
     def get(self, request):
         res = dict()
         # if request.POST.get('username'):
         res = Recognizer(username='rishi')
+        # if res.get('status') == 11:
+        #     pass
         return JsonResponse(res, status=200)
 
 

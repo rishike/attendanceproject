@@ -2,15 +2,11 @@ import os
 import numpy as np
 import pickle
 import cv2 as cv
-import time
-import datetime
-import time
-from django.conf import settings
 from django.conf import settings
 
 
 def Recognizer(username=None):
-    file_path = os.path.join(settings.BASE_DIR, "capture", username)
+    file_path = os.path.join(settings.BASE_DIR, "train")
     label_encoding = pickle.loads(open(file_path+'/'+'le.pickle', 'rb').read())
     recognizer = pickle.loads(open(file_path+'/'+'recognizer.pickle', 'rb').read())
 
@@ -66,6 +62,7 @@ def Recognizer(username=None):
             if found:
                 res['msg'] = "found"
                 res['status'] = 11
+                res['username'] = name
                 cv.putText(frame, "press m to mark your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 1)
 
                 key = cv.waitKey(50) & 0xff

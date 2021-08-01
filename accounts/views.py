@@ -34,7 +34,8 @@ def logout(request):
         del request.session['username']
         del request.session['typ']
         del request.session['name']
-    except:
+    except Exception as e:
+        print(e)
         return redirect('accounts:login')
     return redirect('accounts:login')
 
@@ -46,7 +47,6 @@ def upload_file(request):
         if form.is_valid():
             img_file = request.FILES['captured']
             filename = img_file.name
-            print(img_file)
             pth = os.path.join(settings.MEDIA_ROOT, "rishi", filename)
             with open(pth, "wb") as fp:
                 for chunk in img_file.chunks():
@@ -109,7 +109,7 @@ class LoginView(View):
     def get(self, request):
         context_data = check_session(request)
         if context_data:
-            return redirect('dashboard')
+            return redirect('dashboard:home')
         return render(request, self.template_name)
 
     def post(self, request):
@@ -126,7 +126,7 @@ class LoginView(View):
             request.session['username'] = user_obj.username
             request.session['typ'] = user_obj.type
             request.session['name'] = user_obj.name
-            return redirect('dashboard')
+            return redirect('dashboard:home')
         else:
             context_data = {
                 "email_error": validation.get('error'),

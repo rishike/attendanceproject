@@ -18,16 +18,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from dashboard.views import FirstPageView
-from dashboard.views import CheckEmail
+from dashboard.views import CheckEmail, fetch_processing_image
 from accounts.views import upload_file
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', FirstPageView.as_view(), name='FirstPage'),
     path('accounts/', include('accounts.urls', namespace='accounts')),
-    path('', include('dashboard.urls')),
+    path('', include('dashboard.urls', namespace='dashboard')),
     path('validate/', CheckEmail),
-    path('upload_file/', upload_file)
+    path('upload_file/', upload_file),
+    path('processing_image/<str:param>/', fetch_processing_image),
 ]
 
 if settings.DEBUG:
