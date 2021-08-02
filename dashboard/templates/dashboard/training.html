@@ -53,8 +53,10 @@
     </div>
   </div>
 </div>
-
+{% endblock %}
+{% block scripts %}
         <script>
+        $(document).ready(function() {
         $("#trainingImageBtn").click(function() {
                 let url = "http://127.0.0.1:8000/training/rishi/"
                 let url2 = "http://127.0.0.1:8000/processing_image/total_img"
@@ -88,10 +90,11 @@
                         }
                         document.getElementById('processingButton').classList.remove('d-none');
 
-                        setTimeout(function(){ location.reload(); }, 3000);
+<!--                        setTimeout(function(){ location.reload(); }, 3000);-->
                     }
                  });
         });
+});
         </script>
 
 {% endblock %}

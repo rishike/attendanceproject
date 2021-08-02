@@ -6,7 +6,7 @@ import pickle
 import os
 from django.conf import settings
 import pathlib
-
+from PIL import Image
 
 def Training(request, username=None):
     proto_path = os.path.join(settings.BASE_DIR, 'model', 'deploy.prototxt')
@@ -30,6 +30,9 @@ def Training(request, username=None):
     for (i, filename) in enumerate(filenames):
         pth = pathlib.PurePath(filename)
         request.session['processing_image_'+str(i)] = pth.name
+
+        im_show = Image.open(filename).convert('L')
+        np_faces = np.array(im_show, 'uint8')
 
         image = cv.imread(filename)
         image = cv.resize(image, (600, 400))
@@ -56,6 +59,12 @@ def Training(request, username=None):
             name = filename.split(os.path.sep)[-2]
             face_embeddings.append(face_recognitions.flatten())
             face_names.append(name)
+            try:
+
+                cv.imshow("training", np_faces)
+                cv.waitKey(100)
+            except Exception as e:
+                print(str(e))
 
 
     request.session['prcs_image_req'] = False
@@ -76,4 +85,5 @@ def Training(request, username=None):
     with open(le_path, "ab+") as fp:
         fp.write(pickle.dumps(le))
 
+    cv.destroyAllWindows()
     return True
