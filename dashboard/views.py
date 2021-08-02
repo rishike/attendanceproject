@@ -63,16 +63,19 @@ class TrainingView(View):
     template_name = "dashboard/training.html"
 
     def get(self, request, username):
-        context_data = dict()
-        profile_obj = get_object_or_404(Accounts, username=username)
-        pth = os.path.join(settings.MEDIA_ROOT, profile_obj.username)
-        filenames = []
-        for path, subdirs, files in os.walk(pth):
-            for name in files:
-                if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
-                    filenames.append(name)
-        context_data['filenames'] = filenames
-        return render(request, template_name=self.template_name, context=context_data)
+        context_data = check_session(request)
+        if context_data:
+            profile_obj = get_object_or_404(Accounts, username=username)
+            pth = os.path.join(settings.MEDIA_ROOT, profile_obj.username)
+            filenames = []
+            for path, subdirs, files in os.walk(pth):
+                for name in files:
+                    if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
+                        filenames.append(name)
+            context_data['filenames'] = filenames
+            return render(request, template_name=self.template_name, context=context_data)
+        else:
+            return redirect('accounts:login')
 
     def post(self, request, username):
         res = Training(request, username)
