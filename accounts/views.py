@@ -208,49 +208,62 @@ class CaptureView(View):
     eyes_cascade = cv.CascadeClassifier("data/haarcascade_eye_tree_eyeglasses.xml")
     img_file_path = os.path.join(settings.BASE_DIR, "capture")
 
-    def detect_and_capture(self, frame):
+    def detect_and_capture(self, frame, count):
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         frame_gray = cv.equalizeHist(frame_gray)
 
         # -- Detect Faces
-        faces = self.face_cascade.detectMultiScale(frame_gray, scaleFactor=1.5, minNeighbors=5)
+        faces = self.face_cascade.detectMultiScale(frame_gray, scaleFactor=1.3, minNeighbors=5)
         for (x, y, w, h) in faces:
-            center = (x + w // 2, y + h // 2)
-            face_frame = cv.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 3)
 
-            face_roi = frame_gray[y:y + h, x:x + w]
-            roi_color = face_frame[y:y + h, x:x + w]
+            cv.imwrite(self.img_file_path + '/john_' + str(count) + '.jpg',
+                       frame_gray[y:y + h, x:x + w])
+            center = (x + w // 2, y + h // 2)
+            face_frame = cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+
+            # face_roi = frame_gray[y:y + h, x:x + w]
+            # roi_color = face_frame[y:y + h, x:x + w]
 
             # -- In face, detect eyes
-            eyes = self.eyes_cascade.detectMultiScale(face_roi)
-            for (x2, y2, w2, h2) in eyes:
-                eye_frame = cv.rectangle(roi_color, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
-        cv.imshow('C for capture, Q for quit - Face detection', frame)
+            # eyes = self.eyes_cascade.detectMultiScale(face_roi)
+            # for (x2, y2, w2, h2) in eyes:
+            #     eye_frame = cv.rectangle(roi_color, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
+            cv.putText(frame, "Captured", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+                       (0, 255, 0), 1)
+
+            cv.waitKey(250)
+
+
 
     def get(self, request):
         cap = cv.VideoCapture(0)
-        rand_img_name = uuid.uuid4().hex
+        # rand_img_name = uuid.uuid4().hex
+        count = 1
         if cap.isOpened():
-            while cap.isOpened():
+            while True:
                 ret, frame = cap.read()
                 if frame is None:
                     return JsonResponse({
                         "msg": "No captured frame",
                         "status": 404
                     }, status=200)
-                # cv.imwrite(f"{self.img_file_path}\{rand_img_name}.png", frame)
-                self.detect_and_capture(frame)
-                if cv.waitKey(25) & 0xff == ord('q'):
+                self.detect_and_capture(frame, count)
+                count += 1
+                # cv.putText(frame, "press q to exit", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+                #            (0, 255, 0), 1)
+                cv.imshow('Create dataset', frame)
+
+                cv.waitKey(1)
+                if count > 50:
                     break
-                if cv.waitKey(25) & 0xff == ord('c'):
-                    break
+                # if cv.waitKey(25) & 0xff == ord('c'):
+                #     break
             cap.release()
             cv.destroyAllWindows()
 
             return JsonResponse({
                 "msg": "successfully captured",
                 "status": 301,
-                "file_name": rand_img_name + ".png"
             }, status=200)
         else:
             return JsonResponse({

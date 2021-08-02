@@ -67,7 +67,6 @@ class MarkAttendanceOutView(View):
             user = Accounts.objects.filter(username=res['username'])
             not_marked = Attendance.objects.filter(userid_id=user[0].id, marked_at__gte=START_DATE, marked_at__lte=END_DATE, marked_out__isnull=True)
             if not_marked:
-                print('not_marked')
                 not_marked[0].marked_out = NOW
                 not_marked[0].save()
                 res['msg'] = "Attendance has been marked out successfully for " + res['username']
