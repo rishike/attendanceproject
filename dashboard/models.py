@@ -6,7 +6,7 @@ from accounts.models import Accounts
 
 class Attendance(models.Model):
     userid = models.ForeignKey(Accounts, on_delete=models.CASCADE)
-    marked_at = models.DateTimeField(auto_now=True)
+    marked_at = models.DateTimeField(blank=True, null=True)
     marked_out = models.DateTimeField(blank=True, null=True)
 
     class Meta:

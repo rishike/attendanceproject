@@ -8,6 +8,7 @@ from django.conf import settings
 import pathlib
 from PIL import Image
 
+
 def Training(request, username=None):
     proto_path = os.path.join(settings.BASE_DIR, 'model', 'deploy.prototxt')
     caffe_model_path = os.path.join(settings.BASE_DIR, 'model', 'res10_300x300_ssd_iter_140000.caffemodel')

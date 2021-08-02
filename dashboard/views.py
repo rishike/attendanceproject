@@ -59,6 +59,26 @@ def CheckEmail(request):
         }, status=200)
 
 
+class MarkAttendanceOutView(View):
+
+    def get(self, request):
+        res = Recognizer(status='out')
+        if res.get('status') == 11:
+            user = Accounts.objects.filter(username=res['username'])
+            not_marked = Attendance.objects.filter(userid_id=user[0].id, marked_at__gte=START_DATE, marked_at__lte=END_DATE, marked_out__isnull=True)
+            if not_marked:
+                print('not_marked')
+                not_marked[0].marked_out = NOW
+                not_marked[0].save()
+                res['msg'] = "Attendance has been marked out successfully for " + res['username']
+            elif Attendance.objects.filter(userid_id=user[0].id, marked_out__gte=START_DATE, marked_out__lte=END_DATE):
+                res['msg'] = "Attendance has already been marked out successfully for " + res['username']
+                return JsonResponse(res, status=200)
+            else:
+                res['msg'] = res['username'] + " has not exist in our record."
+        return JsonResponse(res, status=200)
+
+
 class TrainingView(View):
     template_name = "dashboard/training.html"
 
@@ -85,10 +105,11 @@ class TrainingView(View):
         }, status=200)
 
 
-class MarkAttendanceView(View):
 
+
+class MarkAttendanceView(View):
     def get(self, request):
-        res = Recognizer(username='rishi')
+        res = Recognizer(status='in')
         if res.get('status') == 11:
             user = Accounts.objects.filter(username=res['username'])
 
@@ -96,7 +117,7 @@ class MarkAttendanceView(View):
                 res['msg'] = "Attendance has already been marked successfully for " + res['username']
                 return JsonResponse(res, status=200)
 
-            attd = Attendance.objects.create(userid=user[0])
+            attd = Attendance.objects.create(userid=user[0], marked_in=NOW)
             attd.save()
             res['msg'] = "Attendance has been marked successfully for " + res['username']
         return JsonResponse(res, status=200)

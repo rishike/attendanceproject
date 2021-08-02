@@ -5,7 +5,7 @@ import cv2 as cv
 from django.conf import settings
 
 
-def Recognizer(username=None):
+def Recognizer(status=None):
     file_path = os.path.join(settings.BASE_DIR, "train")
     label_encoding = pickle.loads(open(file_path+'/'+'le.pickle', 'rb').read())
     recognizer = pickle.loads(open(file_path+'/'+'recognizer.pickle', 'rb').read())
@@ -46,7 +46,7 @@ def Recognizer(username=None):
                     probability = predictions[j]
                     name = label_encoding.classes_[j]
 
-                    if name == username:
+                    if name != 'unknown':
                         text = "{}: {:.2f}".format(name, probability * 100)
                         y = startY - 10 if startY - 10 > 10 else startY + 10
                         cv.rectangle(frame, (startX, startY), (endX, endY), (0, 0, 255), 2)
@@ -63,12 +63,23 @@ def Recognizer(username=None):
                 res['found'] = True
                 res['status'] = 11
                 res['username'] = name
-                cv.putText(frame, "press m to mark your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 1)
+                if status == 'in':
+                    cv.putText(frame, "press m to mark your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+                               (0, 255, 0), 1)
+                if status == 'out':
+                    cv.putText(frame, "press o to mark out your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+                               (0, 255, 0), 1)
+            else:
+                cv.putText(frame, "press q to exit", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+                           (0, 255, 0), 1)
 
-                key = cv.waitKey(50) & 0xff
+            key = cv.waitKey(50) & 0xff
 
-                if key == ord('m'):
-                    break
+            if status == 'in' and key == ord('m'):
+                break
+
+            if status == 'out' and key == ord('o'):
+                break
 
             cv.imshow("Mark Attendance", frame)
             key = cv.waitKey(1) & 0xff

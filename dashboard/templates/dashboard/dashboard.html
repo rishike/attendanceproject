@@ -57,6 +57,18 @@
                  });
          });
 
+         $("#mark-out-attd").click(function() {
+             let url = "http://127.0.0.1:8000/markoutattendance/"
+                fetch(url,  {
+                    method : 'get',
+                 }).then(response => response.json())
+                 .then(data => {
+                        if (data['status'] == 00) { alert('camera not found'); location.reload();  }
+                        if (data['status'] == 10) { alert('Application has been closed'); location.reload();  }
+                        if (data['status'] == 11) { alert(data['msg']); location.reload();  }
+                 });
+         });
+
     });
 
 </script>
