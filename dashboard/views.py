@@ -105,8 +105,6 @@ class TrainingView(View):
         }, status=200)
 
 
-
-
 class MarkAttendanceView(View):
     def get(self, request):
         res = Recognizer(status='in')
