@@ -15,11 +15,14 @@ from django.conf import settings
 import os
 from PIL import Image
 import copy
+import numpy as np
 import pickle
 
 # Create your views here.
 ORIGINAL_UPLOAD_PATH = os.path.join(settings.BASE_DIR, 'original')
 CAPTURED_PATH = os.path.join(settings.BASE_DIR, 'capture')
+FACE_CASCADE = cv.CascadeClassifier("data/haarcascade_frontalface_alt.xml")
+EYES_CASCADE = cv.CascadeClassifier("data/haarcascade_eye_tree_eyeglasses.xml")
 
 
 def face_crop(image):
@@ -32,9 +35,9 @@ def face_crop(image):
 
     for f in faces:
         x, y, w, h = [v for v in f]
-        cv.rectangle(img, (x, y), (x+w, y+h), (255, 255, 255))
+        cv.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255))
 
-        sub_face = img[y:y+h, x:x+w]
+        sub_face = img[y:y + h, x:x + w]
 
         # Converts img array into grayscale
         gray_image = cv.cvtColor(sub_face, cv.COLOR_BGR2GRAY)
@@ -70,30 +73,45 @@ def logout(request):
 
 def upload_file(request, username):
     form = CapturedForm(request.POST, request.FILES)
-    pth = CAPTURED_PATH + "/" + username + "/"
+    upload_path = CAPTURED_PATH + "/" + username + "/"
 
     if request.is_ajax():
         if form.is_valid():
             img_file = request.FILES['captured']
-            im = Image.open(img_file, 'r')
             ori_img_pth = ORIGINAL_UPLOAD_PATH + "/" + str(img_file)
-            im.save(ori_img_pth, 'JPEG')
+            filename = img_file.name
+
             try:
-                crop_img = face_crop(ori_img_pth)
-                crop_img.save(pth + img_file.name)
+                img = cv.imdecode(np.fromstring(img_file.read(), np.uint8), cv.IMREAD_UNCHANGED)
+                gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                img_copy = copy.deepcopy(img)
+                # Detect faces
+                faces = FACE_CASCADE.detectMultiScale(gray, 1.1, 4)
+                if not faces.any():
+                    return JsonResponse(
+                        {'message': 'No face detect in your uploaded file. File not uploaded.', 'status': 00}
+                        , status=200)
+
+                for (x, y, w, h) in faces:
+                    cv.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    write = cv.imwrite(upload_path + filename, img_copy)
+                    if not write:
+                        return JsonResponse({'message': 'Unable to upload your file in our server.',
+                                             'status': 00}, status=200)
+
             except Exception as e:
                 print(e)
-                return JsonResponse({'message': 'seems like there is no face in images'}, status=200)
-
-            filename = img_file.name
+                return JsonResponse(
+                    {'message': 'No face detect in your uploaded file. File not uploaded.', 'status': 00},
+                    status=200)
 
             Captured.objects.create(
                 userid=Accounts.objects.filter(username=username)[0],
                 captured=filename,
-                file_path=pth
+                file_path=upload_path
             )
 
-            return JsonResponse({'message': 'success'}, status=200)
+            return JsonResponse({'message': 'File successfully uploaded.', 'status': 11}, status=200)
     return JsonResponse({'message': 'fail'}, status=200)
 
 
@@ -235,15 +253,12 @@ class UserListView(View):
 
         return redirect('accounts:login')
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
 
 class CaptureView(View):
-    face_cascade = cv.CascadeClassifier("data/haarcascade_frontalface_alt.xml")
-    eyes_cascade = cv.CascadeClassifier("data/haarcascade_eye_tree_eyeglasses.xml")
     img_file_path = os.path.join(settings.BASE_DIR, "capture")
 
     def detect_and_capture(self, frame, count, pth):
@@ -251,31 +266,32 @@ class CaptureView(View):
         frame_gray = cv.equalizeHist(frame_gr)
 
         # -- Detect Faces
-        faces = self.face_cascade.detectMultiScale(frame_gray, scaleFactor=1.3, minNeighbors=5)
+        faces = FACE_CASCADE.detectMultiScale(frame_gray, scaleFactor=1.3, minNeighbors=5)
         for (x, y, w, h) in faces:
             frame2 = copy.deepcopy(frame)
             face_frame = cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
             face_roi = frame_gray[y:y + h, x:x + w]
             roi_color = face_frame[y:y + h, x:x + w]
 
+            cv.imwrite(pth + "/" + str(count) + '.jpg', frame2)
+
             # -- In face, detect eyes
-            eyes = self.eyes_cascade.detectMultiScale(face_roi)
+            eyes = EYES_CASCADE.detectMultiScale(face_roi)
             for (x2, y2, w2, h2) in eyes:
                 cv.rectangle(roi_color, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
-                cv.imwrite(pth+str(count)+'.jpg', frame2)
-            cv.putText(frame, "Captured", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+            cv.putText(frame, "Capturing", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
                        (0, 255, 0), 1)
 
             cv.waitKey(250)
 
-    def get(self, request):
+    def get(self, request, username):
         cap = cv.VideoCapture(0)
         if 'username' not in request.session:
             return JsonResponse({
-                        "msg": "You need to login first.",
-                        "status": 403
-                    }, status=200)
-        username = request.session['username']
+                "msg": "You need to login first.",
+                "status": 403
+            }, status=200)
+
         store_pth = os.path.join(CAPTURED_PATH, username)
         count = 1
         if cap.isOpened():

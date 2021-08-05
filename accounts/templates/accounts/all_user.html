@@ -57,3 +57,10 @@
 </div>
 {% endblock %}
 
+{% block scripts %}
+<script>
+        $(document).ready(function() {
+                $('#userListingTable').DataTable();
+        });
+</script>
+{% endblock %}

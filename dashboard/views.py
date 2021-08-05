@@ -11,11 +11,12 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
 import pathlib
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
-NOW = datetime.now()
+NOW = datetime.now(timezone.utc)
 START_DATE = datetime(NOW.year, NOW.month, NOW.day, hour=00, minute=00, second=00)
 END_DATE = datetime(NOW.year, NOW.month, NOW.day, hour=23, minute=59, second=59)
+
 
 # Create your views here.
 @require_http_methods(["GET", "POST"])
@@ -134,6 +135,46 @@ class FirstPageView(View):
             return redirect('dashboard:home')
 
 
+class AttendanceList(View):
+    template_name = "dashboard/attendance.html"
+
+    def get(self, request, username):
+        user_obj = get_object_or_404(Accounts, username=username)
+        att_obj = Attendance.objects.filter(userid=user_obj.id)
+        present_data = {_.marked_at.date(): [_.marked_at, _.marked_out] for _ in att_obj}
+        context_data = check_session(request)
+        if not context_data:
+            return redirect('accounts:login')
+        context_data['profile_username'] = user_obj.name
+        context_data['joined_on'] = user_obj.created_at
+        diff = NOW.date() - user_obj.created_at.date()
+        context_data['total_attendance'] = diff.days
+        context_data['total_present'] = len(att_obj)
+        context_data['total_absent'] = diff.days - len(att_obj)
+        context_data['att_obj'] = att_obj
+        context_data['full_name'] = user_obj.name
+        atte_dict = {}
+
+        for _ in range(diff.days):
+            atte_dict[_] = {}
+            day = user_obj.created_at.date() + timedelta(_)
+            atte_dict[_]['day'] = day
+            atte_dict[_]['marked_at'] = "-"
+            atte_dict[_]['marked_out'] = "-"
+            atte_dict[_]['status'] = 'Absent'
+            
+            if present_data.get(day):
+                atte_dict[_]['day'] = day
+                atte_dict[_]['marked_at'] = present_data[day][0]
+                atte_dict[_]['marked_out'] = present_data[day][1]
+                atte_dict[_]['status'] = 'Present'
+
+
+        context_data['atte_obj'] = atte_dict
+
+        return render(request, self.template_name, context_data)
+
+
 class DashboardView(View):
     template_name = "dashboard/dashboard.html"
 
@@ -147,7 +188,6 @@ class DashboardView(View):
             context_data['username'] = request.session['username']
             context_data['typ'] = request.session['typ']
             context_data['name'] = request.session['name']
-
             return render(request, self.template_name, context_data)
         else:
             return redirect('accounts:login')
