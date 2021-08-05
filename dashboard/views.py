@@ -162,7 +162,7 @@ class AttendanceList(View):
             atte_dict[_]['marked_at'] = "-"
             atte_dict[_]['marked_out'] = "-"
             atte_dict[_]['status'] = 'Absent'
-            
+
             if present_data.get(day):
                 atte_dict[_]['day'] = day
                 atte_dict[_]['marked_at'] = present_data[day][0]
