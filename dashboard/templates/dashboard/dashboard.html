@@ -21,6 +21,7 @@
   </div>
         </div>
         </div>
+
         <div class="col-3">
       <div class="card" style="width: 18rem;">
           <img src="https://payu.darwinbox.in/images/Icons_latest/calendarc-img.png" class="card-img-top" alt="records">
@@ -29,7 +30,7 @@
           </div>
       </div>
     </div>
-
+{% if username and typ == 'Admin' %}
         <div class="col-3">
       <div class="card" style="width: 18rem;">
           <img src="{% static 'img/training.jpeg' %}" class="card-img-top" alt="Train Image Classifier" width="200">
@@ -39,6 +40,7 @@
       </div>
     </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 

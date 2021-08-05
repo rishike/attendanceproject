@@ -12,7 +12,6 @@ from PIL import Image
 def Training(request, username=None):
     res = {}
     try:
-
         proto_path = os.path.join(settings.BASE_DIR, 'model', 'deploy.prototxt')
         caffe_model_path = os.path.join(settings.BASE_DIR, 'model', 'res10_300x300_ssd_iter_140000.caffemodel')
         face_detector = cv.dnn.readNetFromCaffe(prototxt=proto_path, caffeModel=caffe_model_path)
@@ -24,25 +23,29 @@ def Training(request, username=None):
         filenames = []
         cust_dir = [username, 'unknown']
         for path, subdirs, files in os.walk(image_path):
+            for _ in cust_dir:
+                if _ not in subdirs:
+                    continue
             for name in files:
                 if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
                     filenames.append(os.path.join(path, name))
 
-        # request.session['total_img'] = len(filenames)
         face_embeddings = []
         face_names = []
 
         for (i, filename) in enumerate(filenames):
             pth = pathlib.PurePath(filename)
-            # request.session['processing_image_'+str(i)] = pth.name
 
             image = cv.imread(filename)
             image = cv.resize(image, (600, 400))
             (h, w) = image.shape[:2]
-
-            image_blob = cv.dnn.blobFromImage(image(cv), 1.0, (150, 150), (104.0, 177.0, 123.0), False,
+            try:
+                image_blob = cv.dnn.blobFromImage(image, 1.0, (150, 150), (104.0, 177.0, 123.0), False,
                                               False)
-            face_detector.setInput(image_blob)
+            except cv.error as e:
+                print(str(e))
+
+            fd = face_detector.setInput(image_blob)
             face_detections = face_detector.forward()
 
             i = np.argmax(face_detections[0, 0, :, 2])
@@ -53,7 +56,10 @@ def Training(request, username=None):
                 (startX, startY, endX, endY) = box.astype("int")
                 face = image[startY:endY, startX:endX]
 
-                face_blob = cv.dnn.blobFromImage(face, 1.0 / 255, (96, 96), (0, 0), True, False)
+                try:
+                    face_blob = cv.dnn.blobFromImage(face, 1.0 / 255, (96, 96), (0, 0), True, False)
+                except cv.error as e:
+                    print(str(e))
 
                 face_recognizer.setInput(face_blob)
                 face_recognitions = face_recognizer.forward()
@@ -67,10 +73,8 @@ def Training(request, username=None):
                 except Exception as e:
                     print(str(e))
 
-
-        # request.session['prcs_image_req'] = False
+        cv.destroyWindow("training")
         data = {"embeddings": face_embeddings, "names": face_names}
-        # print(face_embeddings)
 
         le = LabelEncoder()
         labels = le.fit_transform((data["names"]))
@@ -88,9 +92,10 @@ def Training(request, username=None):
             fp.write(pickle.dumps(le))
 
         res['status'] = 11
-        cv.destroyAllWindows()
+
     except Exception as e:
         res['status'] = 00
-        # cv.destroyWindow("training")
+        cv.destroyWindow("training")
         print(str(e))
+    cv.destroyAllWindows()
     return res

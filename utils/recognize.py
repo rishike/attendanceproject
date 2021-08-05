@@ -25,7 +25,10 @@ def Recognizer(status=None):
             _, frame = cap.read()
             frame = cv.resize(frame, (600, 400))
             (h, w) = frame.shape[:2]
-            image_blob = cv.dnn.blobFromImage(cv.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0), False)
+            try:
+                image_blob = cv.dnn.blobFromImage(cv.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0), False)
+            except cv.error as e:
+                print(str(e))
             face_detector.setInput(image_blob)
             face_detections = face_detector.forward()
 
@@ -36,7 +39,10 @@ def Recognizer(status=None):
                     (startX, startY, endX, endY) = box.astype("int")
                     face = frame[startX:endY, startX:endX]
                     (fh, fw) = face.shape[:2]
-                    face_blob = cv.dnn.blobFromImage(face, 1.0/255, (96, 96), (0, 0), True, False)
+                    try:
+                        face_blob = cv.dnn.blobFromImage(face, 1.0/255, (96, 96), (0, 0), True, False)
+                    except cv.error as e:
+                        print(e)
 
                     face_recognizer.setInput(face_blob)
                     vector = face_recognizer.forward()
