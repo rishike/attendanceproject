@@ -15,26 +15,16 @@
     </div>
     <div class="row col-md-12 justify-content-center text-center">
             <div class="col-md-6 col-sm-12">
-                {% if userid is not None %}
-                    <div class="modal fade" id="staticBackdrop"  data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                {% if new_userid is not None %}
+                <div class="modal fade" id="staticBackdrop"  data-bs-keyboard="true" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content">
-                  <div class="modal-header">
-<!--                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>-->
-                  </div>
                   <div class="modal-body">
-                    <div class="alert alert-dark" role="alert">
-                       Successfully username {{ username }} has been created.
-                    </div></div>
-                  <div class="modal-footer">
-                      <form method="post" action="{% url 'accounts:completeSetup' pk=userid  %}">
-                          {% csrf_token %}
-                    <input type="submit" class="btn btn-primary" value="click on next to complete setup">
-                      </form>
-                  </div>
+                      A new user has been created.
+                    </div>
                 </div>
-  </div>
-</div>
+              </div>
+            </div>
                 {% endif %}
             </div>
         </div>
@@ -117,7 +107,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function() {
-    
+        $('#staticBackdrop').modal('show');
    });
 
 </script>

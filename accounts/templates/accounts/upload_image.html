@@ -2,23 +2,17 @@
 
 {% block content %}
 <div class="container mt-5">
-
-    <div class="row">
-<div class="md-6 justify-content-center text-center">
-    <div class="alert alert-success mt-5 bt-5" role="alert">
-            Please Upload Your at least four Picture with different sides of your faces.
-</div>
-</div>
-    </div>
+            <p class="display-3 text-center text-capitalize">Create dataSet for {{ uploader_username }}</p>
+    <hr>
           	<div class="row">
 	  <div class="col-md-6">
-          <p class="title">Use webcam to upload your picture</p>
+          <p class="fs-3 lead">Use webcam to upload your picture</p>
+          <hr>
           <div class="card">
   <div class="card-body text-center">
       <div id="status"></div>
-    <button class="btn btn-outline-danger btn-lg" id="frameCaptured">Captured</button>
-      <video id="output" width=640 height=480 style="max-width: 100%"></video>
-      <button id="addImageButton"  class="btn btn-info" disabled="true">Get a picture</button>
+    <button id="camera_captured" class="btn btn-outline-danger btn-lg">Captured</button>
+      <p><small class="text-muted">it automatically detects your face and captured it, please steady your face for 30 seconds. </small></p>
       <table>
     <tr id="targetImgs"></tr>
     <tr id="targetNames"></tr>
@@ -27,12 +21,13 @@
 </div>
 	  </div>
 	   <div class="col-md-6">
+           <p class="fs-3 lead">Upload your file</p>
+           <hr>
     <form action="" id="upload-form">
             {% csrf_token %}
             <div id="alert-box"></div>
               <div class="form-group files color">
-                <label>Upload Your File </label>
-                <input name="captured" type="file" class="form-control" accept="image/*" oninput="" id="id_image">
+                <input name="captured" type="file" class="form-control" accept="image/*" id="id_image">
               </div>
         </form>
            <hr>
@@ -48,7 +43,21 @@
 	        </div>
 
         	</div>
+                <input type="hidden" name="uploader" value="{{uploader_username}}">
             <script>
+                username = $('input[name=uploader]').val();
+
+                $("#camera_captured").click(function() {
+                         let url = "http://127.0.0.1:8000/accounts/capture"
+                        fetch(url,  {
+                            method : 'get',
+                         }).then(response => response.json())
+                         .then(data => {
+                               alert(data['msg']);
+                         });
+                });
+
+
                 const uploadForm = document.getElementById("upload-form");
                 const input = document.getElementById("id_image");
                 const alertBox = document.getElementById("alert-box");
@@ -66,10 +75,15 @@
 
                 uploadButton.addEventListener('click', () => {
                     const img_data = input.files[0];
+                    username = $('input[name=uploader]').val();
+                    if (img_data == undefined) {
+                        alert('No File detected');
+                        return false;
+                    }
                      const fd = new FormData();
                      fd.append('csrfmiddlewaretoken', csrf[0].value);
                      fd.append('captured', img_data);
-                     let url = "http://127.0.0.1:8000/upload_file/";
+                     let url = "http://127.0.0.1:8000/upload_file/" + username + "/";
                      $.ajax({
                         type: 'POST',
                         url: url,
@@ -101,6 +115,7 @@
                             alertBox.innerHTML = `<div class="alert alert-danger" role="alert">
                                     Ups... something went wrong
                                 </div>`;
+                                uploadForm.reset();
                         },
                         cache: false,
                         contentType: false,

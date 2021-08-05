@@ -27,7 +27,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('', include('dashboard.urls', namespace='dashboard')),
     path('validate/', CheckEmail),
-    path('upload_file/', upload_file),
+    path('upload_file/<str:username>/', upload_file),
     path('processing_image/<str:param>/', fetch_processing_image),
 ]
 

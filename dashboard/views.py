@@ -92,16 +92,19 @@ class TrainingView(View):
                     if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
                         filenames.append(name)
             context_data['filenames'] = filenames
+            context_data['username'] = username
             return render(request, template_name=self.template_name, context=context_data)
         else:
             return redirect('accounts:login')
 
     def post(self, request, username):
         res = Training(request, username)
-        return JsonResponse({
-            'msg': 'success',
-            'status': "200"
-        }, status=200)
+        if res.get('status') == 11:
+            res['msg'] = "Image processing compelete"
+            return JsonResponse(res, status=200)
+        elif res.get('status') == 00:
+            res['msg'] = "500 internal server error"
+            return JsonResponse(res, status=200)
 
 
 class MarkAttendanceView(View):
@@ -114,7 +117,7 @@ class MarkAttendanceView(View):
                 res['msg'] = "Attendance has already been marked successfully for " + res['username']
                 return JsonResponse(res, status=200)
 
-            attd = Attendance.objects.create(userid=user[0], marked_in=NOW)
+            attd = Attendance.objects.create(userid=user[0], marked_at=NOW)
             attd.save()
             res['msg'] = "Attendance has been marked successfully for " + res['username']
         return JsonResponse(res, status=200)

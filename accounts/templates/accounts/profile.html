@@ -6,30 +6,9 @@
 <!--        <div class="d-flex justify-content-end">-->
 <!--            <button type="button" class="btn btn-primary">Train my image</button>-->
 <!--        </div>-->
-        <hr>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card card-body">
 
-                    <h3 style="text-align: center">{{ profile_name|capfirst }}</h3>
-                    <hr>
-                    <img class="img-responsive profile-pic" id="frame" src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" >
-                    <hr>
-                    <div class="mb-3 text-center">
-                        <button type="button" id="capture" class="btn btn-primary">Capture and Train Image </button>
-                    </div>
-
-                    <div class="mb-3">
-                <label for="formFile" class="form-label">Upload User picture </label>
-                <input class="form-control" type="file" id="formFile">
-                    </div>
-                     <div class="mb-3 text-center">
-                        <button type="button" class="btn btn-primary">Upload</button>
-                </div>
-                    <br />
-                </div>
-
-            </div>
+        <div class="row justify-content-center">
+                    <h1 class="text-center">Update Profile</h1>
             <div class="col-md-9">
                 <form action="" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}

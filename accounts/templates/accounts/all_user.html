@@ -34,8 +34,11 @@
                         </td>
                         <td>{{ obj.created_at|date:"d/m/Y" }}</td>
                         <td>
-                            <a href="{% url 'accounts:profile' username=obj.username  %}" class="btn btn-sm btn-success">
+                            <a href="{% url 'accounts:profile' pk=obj.id  %}" class="btn btn-sm btn-success" title="Edit Profile">
                                   <i class="fa fa-pen"></i>
+                            </a>
+                            <a href="{% url 'accounts:dataset' pk=obj.id  %}" class="btn btn-sm btn-success" title="Upload Dataset">
+                                <i class="fa fa-upload" aria-hidden="true"></i>
                             </a>
                         </td>
                     </tr>

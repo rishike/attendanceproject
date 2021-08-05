@@ -22,6 +22,7 @@
                 <hr>
             <form action="">
             {%  csrf_token %}
+             <input type="hidden" name="train_username" value="{{ username }}">
             <button type="button" class="btn btn-success" id="trainingImageBtn" data-bs-toggle="modal" data-bs-target="#trainingImage">
                 Train Image Classifier
             </button>
@@ -42,10 +43,10 @@
       <div class="modal-header">
         <h5 class="modal-title" id="staticBackdropLabel">Image Processing ..</h5>
       </div>
-      <div class="modal-body text-center">
-            <p id="processing_text"><div id="spinner" class="spinner-border" role="status">
+      <div class="modal-body text-center" id="processing_text">
+            <div id="spinner" class="spinner-border" role="status">
     <span class="visually-hidden">Loading...</span>
-  </div></p>
+  </div>
       </div>
       <div class="modal-footer">
         <button id="processingButton" type="button" class="btn btn-secondary d-none" data-bs-dismiss="modal">Close</button>
@@ -58,41 +59,31 @@
         <script>
         $(document).ready(function() {
         $("#trainingImageBtn").click(function() {
-                let url = "http://127.0.0.1:8000/training/rishi/"
+                let username = $('input[name=train_username]').val();
+                let url = "http://127.0.0.1:8000/training/"+username+"/";
                 let url2 = "http://127.0.0.1:8000/processing_image/total_img"
                 formData = new FormData();
                 formData.append('csrfmiddlewaretoken',$('input[name=csrfmiddlewaretoken]').val());
+                content = document.getElementById('processing_text');
+                content.innerHTML = 'Please wait processing image';
                 fetch(url,  {
                     method : 'post',
                     body: formData
                  }).then(response => response.json())
                  .then(data => {
-                    console.log(data);
+                    content.innerHTML = " ";
+                    content.innerHTML  = data['msg']
+                    document.getElementById('processingButton').classList.remove('d-none');
                  });
 
                 content = document.getElementById('processing_text');
-                fetch(url2, {
-                    method: 'get'
-                 }).then(response => response.json())
-                 .then(data => {
-                    if (data['total_img']) {
-                        document.getElementById('spinner').remove();
-                        content.innerHTML = "";
-                        for (let i = 0; i < data['total_img']; i++) {
-                            name = "processing_image_"+i;
-                            let url3 = "http://127.0.0.1:8000/processing_image/"+name+"/";
-                            fetch(url3, {
-                            method: 'get'
-                            }).then(response => response.json())
-                            .then(data => {
-                                content.innerHTML += "<br><b>Processing image " +  data['processing_image_'+i]+" completed.</b>";
-                            });
-                        }
-                        document.getElementById('processingButton').classList.remove('d-none');
 
-<!--                        setTimeout(function(){ location.reload(); }, 3000);-->
-                    }
-                 });
+<!--                fetch(url2, {-->
+<!--                    method: 'get'-->
+<!--                 }).then(response => response.json())-->
+<!--                 .then(data => {-->
+<!--                    -->
+<!--                 });-->
         });
 });
         </script>

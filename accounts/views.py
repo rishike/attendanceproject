@@ -7,16 +7,44 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.core.validators import EmailValidator
 import cv2 as cv
-import uuid
 from .forms import AddUserForm, LoginForm, CapturedForm
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
-
+from PIL import Image
+import copy
+import pickle
 
 # Create your views here.
+ORIGINAL_UPLOAD_PATH = os.path.join(settings.BASE_DIR, 'original')
+CAPTURED_PATH = os.path.join(settings.BASE_DIR, 'capture')
+
+
+def face_crop(image):
+    face_data = os.path.join(settings.BASE_DIR, 'data', 'haarcascade_frontalface_default.xml')
+    cascade = cv.CascadeClassifier(face_data)
+    img = cv.imread(image)
+    mini_size = (img.shape[1], img.shape[0])
+    mini_frame = cv.resize(img, mini_size)
+    faces = cascade.detectMultiScale(mini_frame)
+
+    for f in faces:
+        x, y, w, h = [v for v in f]
+        cv.rectangle(img, (x, y), (x+w, y+h), (255, 255, 255))
+
+        sub_face = img[y:y+h, x:x+w]
+
+        # Converts img array into grayscale
+        gray_image = cv.cvtColor(sub_face, cv.COLOR_BGR2GRAY)
+
+        # Converts np array back into image
+        img = Image.fromarray(gray_image)
+
+        # re-sizing to common dimension
+        img = img.resize((150, 150), Image.ANTIALIAS)
+    return img
 
 
 def check_session(request):
@@ -40,17 +68,24 @@ def logout(request):
     return redirect('accounts:login')
 
 
-def upload_file(request):
+def upload_file(request, username):
     form = CapturedForm(request.POST, request.FILES)
-    username = "rishi"
+    pth = CAPTURED_PATH + "/" + username + "/"
+
     if request.is_ajax():
         if form.is_valid():
             img_file = request.FILES['captured']
+            im = Image.open(img_file, 'r')
+            ori_img_pth = ORIGINAL_UPLOAD_PATH + "/" + str(img_file)
+            im.save(ori_img_pth, 'JPEG')
+            try:
+                crop_img = face_crop(ori_img_pth)
+                crop_img.save(pth + img_file.name)
+            except Exception as e:
+                print(e)
+                return JsonResponse({'message': 'seems like there is no face in images'}, status=200)
+
             filename = img_file.name
-            pth = os.path.join(settings.MEDIA_ROOT, "rishi", filename)
-            with open(pth, "wb") as fp:
-                for chunk in img_file.chunks():
-                    fp.write(chunk)
 
             Captured.objects.create(
                 userid=Accounts.objects.filter(username=username)[0],
@@ -75,8 +110,13 @@ class UploadImageView(View):
     #     },status=200)
 
     def get(self, request, **kwargs):
-        context_data = {}
-        return render(request, template_name=self.template_name, context=context_data)
+        context_data = check_session(request)
+        if context_data:
+            acc_obj = get_object_or_404(Accounts, pk=kwargs['pk'])
+            context_data['uploader_username'] = acc_obj.username
+            return render(request, template_name=self.template_name, context=context_data)
+        else:
+            return redirect('accounts:login')
 
 
 class LoginView(View):
@@ -148,22 +188,19 @@ class AddUserView(CreateView):
 
     def post(self, request, *args, **kwargs):
         add_user = AddUserForm(request.POST)
-
+        context_data = check_session(request)
         if add_user.is_valid():
             new_user = add_user.save(commit=False)
             new_user.password = make_password(new_user.password)
             new_user.active = True
             new_user.save()
-            context_data = {
-                "userid": new_user.id,
-                "name": new_user.name,
-                "username": new_user.username
-            }
+            context_data['new_userid'] = new_user.id
+            pth = os.path.join(CAPTURED_PATH, new_user.username)
+            if not os.path.isdir(pth):
+                os.mkdir(pth, 0o666)
             return render(request, self.template_name, context_data)
         else:
-            context_data = {
-                "form": add_user
-            }
+            context_data['form'] = add_user
             return render(request, self.template_name, context_data)
 
 
@@ -189,14 +226,15 @@ class AllUserListView(View):
 class UserListView(View):
     template_name = "accounts/profile.html"
 
-    def get(self, request, username):
+    def get(self, request, pk):
         context_data = check_session(request)
         if context_data:
-            profile_obj = get_object_or_404(Accounts, username=username)
+            profile_obj = get_object_or_404(Accounts, id=pk)
             context_data['profile_name'] = profile_obj.name
             return render(request, self.template_name, context_data)
 
         return redirect('accounts:login')
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -208,36 +246,37 @@ class CaptureView(View):
     eyes_cascade = cv.CascadeClassifier("data/haarcascade_eye_tree_eyeglasses.xml")
     img_file_path = os.path.join(settings.BASE_DIR, "capture")
 
-    def detect_and_capture(self, frame, count):
-        frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        frame_gray = cv.equalizeHist(frame_gray)
+    def detect_and_capture(self, frame, count, pth):
+        frame_gr = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        frame_gray = cv.equalizeHist(frame_gr)
 
         # -- Detect Faces
         faces = self.face_cascade.detectMultiScale(frame_gray, scaleFactor=1.3, minNeighbors=5)
         for (x, y, w, h) in faces:
-
-            cv.imwrite(self.img_file_path + '/john_' + str(count) + '.jpg',
-                       frame_gray[y:y + h, x:x + w])
-            center = (x + w // 2, y + h // 2)
+            frame2 = copy.deepcopy(frame)
             face_frame = cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-
-            # face_roi = frame_gray[y:y + h, x:x + w]
-            # roi_color = face_frame[y:y + h, x:x + w]
+            face_roi = frame_gray[y:y + h, x:x + w]
+            roi_color = face_frame[y:y + h, x:x + w]
 
             # -- In face, detect eyes
-            # eyes = self.eyes_cascade.detectMultiScale(face_roi)
-            # for (x2, y2, w2, h2) in eyes:
-            #     eye_frame = cv.rectangle(roi_color, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
+            eyes = self.eyes_cascade.detectMultiScale(face_roi)
+            for (x2, y2, w2, h2) in eyes:
+                cv.rectangle(roi_color, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
+                cv.imwrite(pth+str(count)+'.jpg', frame2)
             cv.putText(frame, "Captured", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
                        (0, 255, 0), 1)
 
             cv.waitKey(250)
 
-
-
     def get(self, request):
         cap = cv.VideoCapture(0)
-        # rand_img_name = uuid.uuid4().hex
+        if 'username' not in request.session:
+            return JsonResponse({
+                        "msg": "You need to login first.",
+                        "status": 403
+                    }, status=200)
+        username = request.session['username']
+        store_pth = os.path.join(CAPTURED_PATH, username)
         count = 1
         if cap.isOpened():
             while True:
@@ -247,17 +286,15 @@ class CaptureView(View):
                         "msg": "No captured frame",
                         "status": 404
                     }, status=200)
-                self.detect_and_capture(frame, count)
+
+                self.detect_and_capture(frame, count, store_pth)
                 count += 1
                 # cv.putText(frame, "press q to exit", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
                 #            (0, 255, 0), 1)
                 cv.imshow('Create dataset', frame)
-
                 cv.waitKey(1)
                 if count > 50:
                     break
-                # if cv.waitKey(25) & 0xff == ord('c'):
-                #     break
             cap.release()
             cv.destroyAllWindows()
 

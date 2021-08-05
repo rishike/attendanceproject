@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance">
+          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance" width="200">
             <div class="card-body text-center">
                 <button id="mark-my-attd" class="btn btn-success">Mark My attendance</button>
   </div>
@@ -14,7 +14,7 @@
         </div>
         <div class="col-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance">
+          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark out attendance" width="200">
             <!-- Button trigger modal -->
             <div class="card-body text-center">
                 <button id="mark-out-attd" type="button" class="btn btn-success">Mark out my attendance</button>
@@ -25,14 +25,14 @@
       <div class="card" style="width: 18rem;">
           <img src="https://payu.darwinbox.in/images/Icons_latest/calendarc-img.png" class="card-img-top" alt="records">
           <div class="card-body text-center">
-            <button class="btn btn-success">Attendance History</button>
+            <a href="" class="btn btn-success">Attendance History</a>
           </div>
       </div>
     </div>
 
         <div class="col-3">
-      <div class="card" style="width: 17rem;">
-          <img src="{% static 'img/trainer.png' %}" class="card-img-top" alt="records"   width="200">
+      <div class="card" style="width: 18rem;">
+          <img src="{% static 'img/training.jpeg' %}" class="card-img-top" alt="Train Image Classifier" width="200">
           <div class="card-body text-center">
             <a href="{% url 'dashboard:training' username=username %}" class="btn btn-success">Train Image Classifier</a>
           </div>
