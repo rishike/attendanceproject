@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import cv2 as cv
 from sklearn.preprocessing import LabelEncoder
@@ -6,10 +8,25 @@ import pickle
 import os
 from django.conf import settings
 import pathlib
-from PIL import Image
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+from matplotlib import rcParams
 
 
-def Training(request, username=None):
+def visualise_data(embedded, targets):
+    X_embedded = TSNE(n_components=2).fit_transform(embedded)
+    for i, t in enumerate(set(targets)):
+        idx = targets == t
+        plt.scatter(X_embedded[idx, 0], X_embedded[idx, 1], label=t)
+
+    plt.legend(bbox_to_anchor=(1, 1));
+    rcParams.update({'figure.autolayout': True})
+    plt.tight_layout()
+    plt.savefig('training.png')
+    plt.close()
+
+
+def Training(username=None):
     res = {}
     try:
         proto_path = os.path.join(settings.BASE_DIR, 'model', 'deploy.prototxt')
@@ -34,7 +51,6 @@ def Training(request, username=None):
         face_names = []
 
         for (i, filename) in enumerate(filenames):
-            pth = pathlib.PurePath(filename)
 
             image = cv.imread(filename)
             image = cv.resize(image, (600, 400))
@@ -82,6 +98,10 @@ def Training(request, username=None):
         recognizer = SVC(C=1.0, kernel="linear", probability=True)
         recognizer.fit(data["embeddings"], labels)
 
+        targets = np.array(face_names)
+        X1 = np.array(face_embeddings)
+        visualise_data(X1, targets)
+
         recognizer_path = os.path.join(settings.BASE_DIR, 'train', 'recognizer.pickle')
         le_path = os.path.join(settings.BASE_DIR, 'train', 'le.pickle')
 
@@ -95,7 +115,7 @@ def Training(request, username=None):
 
     except Exception as e:
         res['status'] = 00
-        cv.destroyWindow("training")
+        # cv.destroyWindow("training")
         print(str(e))
     cv.destroyAllWindows()
     return res

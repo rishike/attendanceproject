@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect
-from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView
-from django.views.generic.list import ListView
 from .models import Accounts, Captured
 from django.views import View
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.core.validators import EmailValidator
 import cv2 as cv
-from .forms import AddUserForm, LoginForm, CapturedForm
+from .forms import AddUserForm, LoginForm, CapturedForm, UpdateUserForm
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -56,6 +54,8 @@ def check_session(request):
         context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], \
                                                                               request.session['typ'], request.session[
                                                                                   'name']
+        if request.session['typ'] == 'Admin':
+            context_data['permission'] = True
         return context_data
     return False
 
@@ -129,12 +129,39 @@ class UploadImageView(View):
 
     def get(self, request, **kwargs):
         context_data = check_session(request)
+        pk = kwargs['pk']
+        acc_obj = get_object_or_404(Accounts, pk=pk)
         if context_data:
-            acc_obj = get_object_or_404(Accounts, pk=kwargs['pk'])
+            if context_data.get('permission'):
+                pass
+            elif context_data['username'] == acc_obj.username:
+                pass
+            else:
+                return render(request, template_name='403.html')
+
             context_data['uploader_username'] = acc_obj.username
             return render(request, template_name=self.template_name, context=context_data)
         else:
             return redirect('accounts:login')
+
+
+class DeleteView(View):
+
+    def get(self, request, pk):
+        context_data = check_session(request)
+        res = {
+            'status': True
+        }
+        acc_obj = Accounts.objects.get(pk=pk)
+        acc_obj.active = False
+        acc_obj.save()
+        post_data = request.GET
+        if context_data.get('permission'):
+            res['status'] = True
+            return JsonResponse(res, status=200)
+        else:
+            res['status'] = 'unauthorized'
+            return JsonResponse(res, status=200)
 
 
 class LoginView(View):
@@ -227,7 +254,7 @@ class AllUserListView(View):
 
     def get_queryset(self):
         try:
-            obj = Accounts.objects.all()
+            obj = Accounts.objects.filter(active=True)
             return obj
         except Exception:
             return None
@@ -246,12 +273,45 @@ class UserListView(View):
 
     def get(self, request, pk):
         context_data = check_session(request)
+        profile_obj = get_object_or_404(Accounts, id=pk)
         if context_data:
-            profile_obj = get_object_or_404(Accounts, id=pk)
-            context_data['profile_name'] = profile_obj.name
+            if context_data.get('permission'):
+                pass
+            elif context_data['username'] == profile_obj.username:
+                pass
+            else:
+                return render(request, template_name='403.html')
+
+            context_data['profile_obj'] = profile_obj
             return render(request, self.template_name, context_data)
 
         return redirect('accounts:login')
+
+    def post(self, request, pk):
+        profile_obj = get_object_or_404(Accounts, id=pk)
+        context_data = check_session(request)
+        post_data = request.POST
+        form = {}
+
+        # if post_data.get('username'):
+        #     username = post_data['username']
+        #     username = username.replace(" ", "_")
+        #     profile_obj.username = username
+        #
+        # if post_data.get['password']:
+        #     password = post_data.get('password')
+        #     if len(password) < 6:
+        #         form['errors']['password'] = 'Minimum 6 characters required for password'
+        #     profile_obj.username = password
+
+        # if post_data.get['name']:
+        #     profile_obj.username = post_data['name']
+        #
+        # if post_data.get['type']:
+        #     profile_obj.username = post_data['type']
+        #
+        # profile_obj.save()
+        return render(request, self.template_name, context=context_data)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

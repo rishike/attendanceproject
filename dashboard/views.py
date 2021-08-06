@@ -34,7 +34,9 @@ def check_session(request):
         context_data = dict()
         context_data['username'], context_data['typ'], context_data['name'] = request.session['username'], \
                                                                               request.session['typ'], request.session[
-                                                                                  'name']
+                                                                              'name']
+        if request.session['typ'] == 'Admin':
+            context_data['permission'] = True
         return context_data
     return False
 
@@ -99,7 +101,7 @@ class TrainingView(View):
             return redirect('accounts:login')
 
     def post(self, request, username):
-        res = Training(request, username)
+        res = Training(username)
         if res.get('status') == 11:
             res['msg'] = "Image processing compelete"
             return JsonResponse(res, status=200)
@@ -135,14 +137,41 @@ class FirstPageView(View):
             return redirect('dashboard:home')
 
 
-class AttendanceList(View):
+class AllAttendanceView(View):
+    template_name = "dashboard/all_attendance.html"
+
+    def get(self, request):
+        context_data = check_session(request)
+        if context_data.get('permission'):
+            all_usr_obj = Accounts.objects.all()
+            context_data['total_user'] = all_usr_obj.count()
+            all_atte_obj = {}
+
+            # for obj in all_usr_obj:
+            #     att_obj = Attendance.objects.filter(userid=obj.id)
+            #     present_data = {_.marked_at.date(): [_.marked_at, _.marked_out] for _ in att_obj}
+            #     diff = NOW.date() - obj.created_at.date()
+
+            return render(request, template_name=self.template_name, context=context_data)
+        return render(request, template_name='403.html')
+
+
+class AttendanceListView(View):
     template_name = "dashboard/attendance.html"
 
     def get(self, request, username):
-        user_obj = get_object_or_404(Accounts, username=username)
-        att_obj = Attendance.objects.filter(userid=user_obj.id)
-        present_data = {_.marked_at.date(): [_.marked_at, _.marked_out] for _ in att_obj}
         context_data = check_session(request)
+        user_obj = get_object_or_404(Accounts, username=username)
+
+        if context_data.get('permission'):
+            att_obj = Attendance.objects.filter(userid=user_obj.id)
+        elif context_data['username'] == username:
+            att_obj = Attendance.objects.filter(userid=user_obj.id)
+        else:
+            return render(request, template_name='403.html')
+
+        present_data = {_.marked_at.date(): [_.marked_at, _.marked_out] for _ in att_obj}
+
         if not context_data:
             return redirect('accounts:login')
         context_data['profile_username'] = user_obj.name
@@ -169,7 +198,6 @@ class AttendanceList(View):
                 atte_dict[_]['marked_out'] = present_data[day][1]
                 atte_dict[_]['status'] = 'Present'
 
-
         context_data['atte_obj'] = atte_dict
 
         return render(request, self.template_name, context_data)
@@ -183,11 +211,9 @@ class DashboardView(View):
         return context
 
     def get(self, request):
-        context_data = {}
-        if 'username' in request.session and 'typ' in request.session and 'name' in request.session:
-            context_data['username'] = request.session['username']
-            context_data['typ'] = request.session['typ']
-            context_data['name'] = request.session['name']
+        context_data = check_session(request)
+        if context_data:
+            context_data['userid'] = Accounts.objects.get(username=context_data['username'])
             return render(request, self.template_name, context_data)
         else:
             return redirect('accounts:login')

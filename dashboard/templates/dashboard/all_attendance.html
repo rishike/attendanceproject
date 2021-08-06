@@ -6,49 +6,18 @@
         <div class="col col-md-3 p-3">
             <div class="card bg-primary text-light shadow" style="width: auto;">
                 <div class="card-body">
-                    <h5 class="card-title">Day Joined</h5>
+                    <h5 class="card-title">Total Users</h5>
                     <h6 class="card-subtitle ">
-                        <h1 class="">{{ joined_on|date:"d F Y" }}</h1>
+                        <h1 class="">{{ total_user }}</h1>
                     </h6>
                 </div>
             </div>
         </div>
-        <div class="col col-md-3 p-3">
-            <div class="card bg-primary text-light shadow" style="width: auto;">
-                <div class="card-body">
-                    <h5 class="card-title">Total Attendance</h5>
-                    <h6 class="card-subtitle ">
-                        <h1 class="">{{ total_attendance }}</h1>
-                    </h6>
-                </div>
-            </div>
-        </div>
-        <div class="col col-md-3 p-3">
-            <div class="card bg-primary text-light shadow" style="width: auto;">
-                <div class="card-body">
-                    <h5 class="card-title">Total Present</h5>
-                    <h6 class="card-subtitle ">
-                        <h1 class="">{{ total_present }}</h1>
-                    </h6>
-                </div>
-            </div>
-        </div>
-        <div class="col col-md-3 p-3">
-            <div class="card  bg-primary text-light shadow" style="width: auto;">
-                <div class="card-body">
-                    <h5 class="card-title">Total Absent</h5>
-                    <h6 class="card-subtitle">
-                        <h1 class="">{{ total_absent }}</h1>
-                    </h6>
-                </div>
-            </div>
-        </div>
-    </div>
     <div>
 
         <div class="container">
     <div class="d-flex mt-4">
-        <h3 class="fs-3 text-capitalize lead">Attendance List of {{ profile_username }}</h3>
+        <h3 class="fs-3 text-capitalize lead">Attendance List of All Users</h3>
     </div>
     <hr>
     <div class="row my-4 card shadow">
@@ -66,10 +35,10 @@
                 </thead>
                 <tbody>
 
-                    {% for obj in atte_obj.values %}
+                    {% for obj in all_atte_obj.values %}
                      <tr>
                         <th scope="row">{{ obj.day }}</th>
-                        <td></td>
+                        <td>{{ full_name }}</td>
                         <td>Standard User</td>
                         <td><b>{{ obj.marked_at }}</b></td>
                         <td><b>{{ obj.marked_out }}</b></td>
@@ -88,6 +57,7 @@
         </div>
     </div>
 </div>
+
 
 {% endblock %}
 

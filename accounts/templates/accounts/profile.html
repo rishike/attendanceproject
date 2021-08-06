@@ -14,7 +14,7 @@
                     {% csrf_token %}
                     <div class="form-group">
                 <label for="username">Username<span class="link-danger">*</span></label>
-                <input type="text" class="form-control" name="username" aria-describedby="usernameHelp" required="" id="username">
+                <input type="text" class="form-control" name="username" aria-describedby="usernameHelp"  id="username">
                 <p class="text-error text-danger">
                     {% if form.username.errors %}
                         {{ form.username.errors.as_text }}
@@ -24,7 +24,7 @@
 
              <div class="form-group">
                 <label for="name">User Full Name<span class="link-danger">*</span></label>
-                <input type="text" class="form-control" name="name" aria-describedby="nameHelp" required="" id="name">
+                <input type="text" class="form-control" name="name" aria-describedby="nameHelp"  id="name">
                 <p class="text-error text-danger">
                     {% if form.name.errors %}
                         {{ form.name.errors.as_text }}
@@ -33,7 +33,7 @@
             </div>
             <div class="form-group">
                 <label for="password">User Password<span class="link-danger">*</span></label>
-                <input type="password" class="form-control" name="password" required="" id="password" aria-describedby="passwordHelp">
+                <input type="password" class="form-control" name="password"  id="password" aria-describedby="passwordHelp">
                 <p class="text-error text-danger">
                     {% if form.password.errors %}
                         {{ form.password.errors.as_text }}

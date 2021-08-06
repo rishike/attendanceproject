@@ -37,6 +37,11 @@
                             <a href="{% url 'accounts:profile' pk=obj.id  %}" class="btn btn-sm btn-success" title="Edit Profile">
                                   <i class="fa fa-pen"></i>
                             </a>
+                            <button type="button" class="btn btn-sm btn-danger del-id"
+                               data-id="{{ obj.id }}"
+                               title="Delete Profile">
+                                  <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
                             <a href="{% url 'accounts:dataset' pk=obj.id  %}" class="btn btn-sm btn-success" title="Upload Dataset">
                                 <i class="fa fa-upload" aria-hidden="true"></i>
                             </a>
@@ -60,7 +65,47 @@
 {% block scripts %}
 <script>
         $(document).ready(function() {
-                $('#userListingTable').DataTable();
+                var showUserTable = $('#userListingTable').DataTable();
+                const url = "http://127.0.0.1:8000/accounts/"
+        const delUid = (elem) => {
+        swal({
+          title: "Are you sure?",
+          text: "Once deleted, you will not be able to recover this User",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        }).then((response) => {
+            if (response) {
+                swal("User has been deleted", {
+                  icon: "success",
+                });
+                let targid = elem.target.getAttribute('data-id');
+                return  fetch(url+targid+"/archive/", {
+                    method:  "GET",
+                }).then(res=> {
+                    return res.json();
+                }).then(function(res) {
+                    if (res.status) {
+                    showUserTable.row($("[data-id='"+targid+"'").parents('tr')).remove().draw();
+                    } else if (res.status =='unauthorized') {
+                        swal("You are not authorized is to delete this user.");
+                    }
+                }).catch((reason) =>{
+                  console.log(reason);
+                });
+            } else {
+                swal("User is safe");
+            }
+        });
+    };
+
+    document.querySelectorAll('[data-id]').forEach(function(elem) {
+     elem.addEventListener('click', (elem) =>{
+         delUid(elem);
+        });
+    });
+
+
         });
 </script>
 {% endblock %}

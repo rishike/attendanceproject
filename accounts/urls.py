@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import LoginView, AddUserView, CaptureView, AllUserListView, UserListView, logout, UploadImageView
+from .views import LoginView, AddUserView, CaptureView, AllUserListView, UserListView, logout, UploadImageView, \
+    DeleteView
 
 app_name = 'accounts'
 urlpatterns = [
@@ -9,7 +10,8 @@ urlpatterns = [
     path('profile/<int:pk>/', UserListView.as_view(), name="profile"),
     path('capture/<str:username>/', CaptureView.as_view(), name="capture"),
     path('logout/', logout, name='logout'),
-    path('<int:pk>/upload/', UploadImageView.as_view(), name='dataset')
+    path('<int:pk>/upload/', UploadImageView.as_view(), name='dataset'),
+    path('<int:pk>/archive/', DeleteView.as_view(), name='archive-user')
 ]
 
 # (?P<user_name>\w+)

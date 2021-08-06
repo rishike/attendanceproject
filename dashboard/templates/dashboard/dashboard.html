@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance" width="200">
+          <img src="{% static 'img/markin.png' %}" class="card-img-top" alt="Mark My attendance" height="230">
             <div class="card-body text-center">
                 <button id="mark-my-attd" class="btn btn-success">Mark My attendance</button>
   </div>
@@ -14,7 +14,7 @@
         </div>
         <div class="col-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark out attendance" width="200">
+          <img src="{% static 'img/markout.jpg' %}" class="card-img-top" alt="Mark out attendance" height="230">
             <!-- Button trigger modal -->
             <div class="card-body text-center">
                 <button id="mark-out-attd" type="button" class="btn btn-success">Mark out my attendance</button>
@@ -24,16 +24,37 @@
 
         <div class="col-3">
       <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/calendarc-img.png" class="card-img-top" alt="records">
+          <img src="{% static 'img/attendance.jpg' %}" class="card-img-top" alt="records" height="230">
           <div class="card-body text-center">
             <a href="{% url 'dashboard:attendance-history' username=username %}" class="btn btn-success">Attendance History</a>
           </div>
       </div>
     </div>
-{% if username and typ == 'Admin' %}
+
         <div class="col-3">
       <div class="card" style="width: 18rem;">
-          <img src="{% static 'img/training.jpeg' %}" class="card-img-top" alt="Train Image Classifier" width="200">
+          <img src="{% static 'img/upload.png' %}" class="card-img-top" alt="records" height="230">
+          <div class="card-body text-center">
+            <a href="{% url 'accounts:dataset' pk=userid.id %}" class="btn btn-success">Upload Dataset</a>
+          </div>
+      </div>
+    </div>
+    </div>
+    <hr>
+    {% if permission %}
+    <div class="row mt-5 mb-5">
+    <div class="col-3">
+      <div class="card" style="width: 18rem;">
+          <img src="{% static 'img/all_attendance.png' %}" class="card-img-top" alt="records" height="230">
+          <div class="card-body text-center">
+            <a href="{% url 'dashboard:all-attendance-history' %}" class="btn btn-success">All Attendance History</a>
+          </div>
+      </div>
+    </div>
+
+   <div class="col-3">
+      <div class="card" style="width: 18rem;">
+          <img src="{% static 'img/training3.jpg' %}" class="card-img-bottom" alt="Train Image Classifier" height="230">
           <div class="card-body text-center">
             <a href="{% url 'dashboard:training' username=username %}" class="btn btn-success">Train Image Classifier</a>
           </div>

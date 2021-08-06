@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import DashboardView, MarkAttendanceView, TrainingView, MarkAttendanceOutView, AttendanceList
+from .views import DashboardView, MarkAttendanceView, TrainingView, MarkAttendanceOutView, AttendanceListView,\
+    AllAttendanceView
 
 app_name = 'dashboard'
 
@@ -8,6 +9,7 @@ urlpatterns = [
     path('markattendance/', MarkAttendanceView.as_view(), name='mark-attendance'),
     path('markoutattendance/', MarkAttendanceOutView.as_view(), name='mark-out-attendance'),
     path('training/<str:username>/', TrainingView.as_view(), name="training"),
-    path('attendance/<str:username>/', AttendanceList.as_view(), name="attendance-history")
+    path('attendance/<str:username>/', AttendanceListView.as_view(), name="attendance-history"),
+    path('attendance/show/all/', AllAttendanceView.as_view(), name="all-attendance-history"),
 
 ]

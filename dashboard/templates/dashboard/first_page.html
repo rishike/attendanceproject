@@ -1,21 +1,22 @@
 {% extends "main.html" %}
+{% load static %}
 {% block content %}
 
 <div class="container mt-5">
     <div class="row">
         <div class="col-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance">
+          <img src="{% static 'img/markin.png' %}" class="card-img-top" alt="Mark My attendance" height="230">
             <!-- Button trigger modal -->
             <div class="card-body text-center">
-                <button id="mark-my-attd" type="button" class="btn btn-success"  >Mark my attendance</button>
+                <button id="mark-my-attd" type="button" class="btn btn-success" >Mark my attendance</button>
   </div>
         </div>
         </div>
 
         <div class="col-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://payu.darwinbox.in/images/Icons_latest/attendance.png" class="card-img-top" alt="Mark My attendance">
+          <img src="{% static 'img/markout.jpg' %}" class="card-img-top" alt="Mark My attendance" height="230">
             <!-- Button trigger modal -->
             <div class="card-body text-center">
                 <button id="mark-out-attd" type="button" class="btn btn-success">Mark out my attendance</button>
