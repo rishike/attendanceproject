@@ -3,37 +3,22 @@
 {% block content %}
     <div class="container mt-5">
         <div class="row mb-5">
-            <div class="col-6 justify-content-left">
-        <div class="card mt-5 mb-5 overflow-auto" style="height:500px">
-          <div class="card-header alert alert-danger">
-              <b>Rishi Singh</b> Image Lists
-          </div>
-          <ul class="list-group list-group-flush">
-              {% for filename in filenames %}
-                       <li class="list-group-item">{{ filename }}</li>
-                {% endfor %}
-          </ul>
-        </div>
-                </div>
 
-            <div class="col-6 justify-content-left text-center mt-5" style="">
+            <div class="col-6 justify-content-center text-center mt-5" style="">
         <div style="width: 18rem;margin-left:150px; margin-top:40px;">
-       <img src="{% static 'img/training.jpeg' %}" class="img-responsive profile-pic card-img-top" alt="training"   width="200">
+       <img src="{% static 'img/training3.jpg' %}" class="img-responsive profile-pic card-img-top" alt="training">
                 <hr>
             <form action="">
             {%  csrf_token %}
-             <input type="hidden" name="train_username" value="{{ username }}">
             <button type="button" class="btn btn-success" id="trainingImageBtn" data-bs-toggle="modal" data-bs-target="#trainingImage">
                 Train Image Classifier
             </button>
                  </form>
         </div>
             </div>
-
-<!--        </div>-->
-
-<!--            <button class="btn btn-primary">Train my images</button>-->
-<!--        </div>-->
+            <div class="col-6 justify-content-right text-center mt-5" style="">
+                    <img src="{% static 'graph/training.png' %}" alt=" " width="600" height="400">
+                </div>
     </div>
     </div>
 
@@ -59,9 +44,7 @@
         <script>
         $(document).ready(function() {
         $("#trainingImageBtn").click(function() {
-                let username = $('input[name=train_username]').val();
-                let url = "http://127.0.0.1:8000/training/"+username+"/";
-                let url2 = "http://127.0.0.1:8000/processing_image/total_img"
+                let url = "http://127.0.0.1:8000/training/all/";
                 formData = new FormData();
                 formData.append('csrfmiddlewaretoken',$('input[name=csrfmiddlewaretoken]').val());
                 content = document.getElementById('processing_text');
@@ -77,13 +60,6 @@
                  });
 
                 content = document.getElementById('processing_text');
-
-<!--                fetch(url2, {-->
-<!--                    method: 'get'-->
-<!--                 }).then(response => response.json())-->
-<!--                 .then(data => {-->
-<!--                    -->
-<!--                 });-->
         });
 });
         </script>

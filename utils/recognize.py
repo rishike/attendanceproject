@@ -41,6 +41,7 @@ def Recognizer(status=None):
                     (fh, fw) = face.shape[:2]
                     try:
                         face_blob = cv.dnn.blobFromImage(face, 1.0/255, (96, 96), (0, 0), True, False)
+                        # print(face_blob)
                     except cv.error as e:
                         print(e)
 
@@ -50,19 +51,22 @@ def Recognizer(status=None):
                     predictions = recognizer.predict_proba(vector)[0]
                     j = np.argmax(predictions)
                     probability = predictions[j]
+                    # print(predictions)
+                    # print("------")
+                    # print(label_encoding.classes_[j])
                     name = label_encoding.classes_[j]
 
                     if name != 'unknown':
                         text = "{}: {:.2f}".format(name, probability * 100)
                         y = startY - 10 if startY - 10 > 10 else startY + 10
                         cv.rectangle(frame, (startX, startY), (endX, endY), (0, 0, 255), 2)
-                        cv.putText(frame, text, (startX, y), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0 ,255, 0) ,1)
+                        cv.putText(frame, text, (startX, y), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255) ,1)
                         found = True
                     else:
                         text = "{}: {:.2f}".format("unknown", probability * 100)
                         y = startY - 10 if startY - 10 > 10 else startY + 10
                         cv.rectangle(frame, (startX, startY), (endX, endY), (0, 0, 255), 2)
-                        cv.putText(frame, text, (startX, y), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                        cv.putText(frame, text, (startX, y), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
                         found = False
 
             if found:
@@ -71,10 +75,10 @@ def Recognizer(status=None):
                 res['username'] = name
                 if status == 'in':
                     cv.putText(frame, "press m to mark your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
-                               (0, 255, 0), 1)
+                               (255, 0, 0), 1)
                 if status == 'out':
                     cv.putText(frame, "press o to mark out your attendance", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
-                               (0, 255, 0), 1)
+                               (255, 0, 0), 1)
             else:
                 cv.putText(frame, "press q to exit", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
                            (0, 255, 0), 1)

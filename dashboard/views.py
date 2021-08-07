@@ -84,24 +84,18 @@ class MarkAttendanceOutView(View):
 class TrainingView(View):
     template_name = "dashboard/training.html"
 
-    def get(self, request, username):
+    def get(self, request):
         context_data = check_session(request)
         if context_data:
-            profile_obj = get_object_or_404(Accounts, username=username)
-            pth = os.path.join(settings.MEDIA_ROOT, profile_obj.username)
-            filenames = []
-            for path, subdirs, files in os.walk(pth):
-                for name in files:
-                    if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
-                        filenames.append(name)
-            context_data['filenames'] = filenames
-            context_data['username'] = username
-            return render(request, template_name=self.template_name, context=context_data)
+            if context_data.get('permission'):
+                return render(request, template_name=self.template_name, context=context_data)
+            else:
+                return render(request, template_name='403.html')
         else:
             return redirect('accounts:login')
 
-    def post(self, request, username):
-        res = Training(username)
+    def post(self, request):
+        res = Training()
         if res.get('status') == 11:
             res['msg'] = "Image processing compelete"
             return JsonResponse(res, status=200)

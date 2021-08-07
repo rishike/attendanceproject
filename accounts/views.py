@@ -14,7 +14,9 @@ import os
 from PIL import Image
 import copy
 import numpy as np
+from django.db import IntegrityError
 import pickle
+from datetime import datetime
 
 # Create your views here.
 ORIGINAL_UPLOAD_PATH = os.path.join(settings.BASE_DIR, 'original')
@@ -105,11 +107,11 @@ def upload_file(request, username):
                     {'message': 'No face detect in your uploaded file. File not uploaded.', 'status': 00},
                     status=200)
 
-            Captured.objects.create(
-                userid=Accounts.objects.filter(username=username)[0],
-                captured=filename,
-                file_path=upload_path
-            )
+            # Captured.objects.create(
+            #     userid=Accounts.objects.filter(username=username)[0],
+            #     captured=filename,
+            #     file_path=upload_path
+            # )
 
             return JsonResponse({'message': 'File successfully uploaded.', 'status': 11}, status=200)
     return JsonResponse({'message': 'fail'}, status=200)
@@ -264,7 +266,9 @@ class AllUserListView(View):
         if context_data:
             if context_data['typ'] == 'Admin':
                 context_data['userobj'] = self.get_queryset()
-            return render(request, self.template_name, context_data)
+                return render(request, self.template_name, context_data)
+            else:
+                return render(request, template_name='403.html')
         return redirect('accounts:login')
 
 
@@ -276,8 +280,6 @@ class UserListView(View):
         profile_obj = get_object_or_404(Accounts, id=pk)
         if context_data:
             if context_data.get('permission'):
-                pass
-            elif context_data['username'] == profile_obj.username:
                 pass
             else:
                 return render(request, template_name='403.html')
@@ -291,27 +293,66 @@ class UserListView(View):
         profile_obj = get_object_or_404(Accounts, id=pk)
         context_data = check_session(request)
         post_data = request.POST
-        form = {}
+        form = {
+            "username": {
+                "errors": ""
+            },
+            "type": {
+                "errors": ""
+            },
+            "name": {
+                "errors": ""
+            },
+            "password": {
+                "errors": ""
+            }
+        }
+        update_data = {}
 
-        # if post_data.get('username'):
-        #     username = post_data['username']
-        #     username = username.replace(" ", "_")
-        #     profile_obj.username = username
-        #
-        # if post_data.get['password']:
-        #     password = post_data.get('password')
-        #     if len(password) < 6:
-        #         form['errors']['password'] = 'Minimum 6 characters required for password'
-        #     profile_obj.username = password
+        if post_data.get('username'):
+            username = post_data['username']
+            if len(username) > 255:
+                form['username']['errors'] = 'Username cannot be greater than 255 characters'
+                form['error'] = True
+            username = username.replace(" ", "_")
+            update_data['username'] = username
 
-        # if post_data.get['name']:
-        #     profile_obj.username = post_data['name']
-        #
-        # if post_data.get['type']:
-        #     profile_obj.username = post_data['type']
-        #
-        # profile_obj.save()
-        return render(request, self.template_name, context=context_data)
+        if post_data.get('password'):
+            password = post_data.get('password')
+            if len(password) < 6:
+                form['password']['errors'] = 'Minimum 6 characters required for password'
+                form['error'] = True
+            if len(password) > 48:
+                form['password']['errors'] = 'Password cannot be greater than 48 characters'
+                form['error'] = True
+            update_data['password'] = make_password(password)
+
+        if post_data.get('name'):
+            name = post_data['name']
+            if len(name) > 255:
+                form['name']['errors'] = 'Name cannot be greater than 255 characters'
+                form['error'] = True
+            update_data['name'] = name
+
+        if post_data.get('type'):
+            typ = post_data['type']
+            if typ not in ['Admin', 'Standard User']:
+                form['type']['errors'] = "Only be admin and standard user types are allowed."
+                form['error'] = True
+            update_data['type'] = typ
+
+        context_data['profile_obj'] = profile_obj
+        context_data['form'] = form
+        if form.get('error'):
+            return render(request, self.template_name, context=context_data)
+        try:
+            update = Accounts.objects.filter(pk=pk).update(**update_data)
+            context_data['update'] = update
+            return render(request, self.template_name, context=context_data)
+        except IntegrityError as e:
+            form['username']['errors'] = 'Duplicate username not allowed.'
+            form['error'] = True
+            return render(request, self.template_name, context=context_data)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -320,6 +361,7 @@ class UserListView(View):
 
 class CaptureView(View):
     img_file_path = os.path.join(settings.BASE_DIR, "capture")
+    count = 0
 
     def detect_and_capture(self, frame, count, pth):
         frame_gr = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -333,8 +375,8 @@ class CaptureView(View):
             face_roi = frame_gray[y:y + h, x:x + w]
             roi_color = face_frame[y:y + h, x:x + w]
 
-            cv.imwrite(pth + "/" + str(count) + '.jpg', frame2)
-
+            cv.imwrite(pth + "/" + str(self.count) + '.jpg', frame2)
+            self.count += 1
             # -- In face, detect eyes
             eyes = EYES_CASCADE.detectMultiScale(face_roi)
             for (x2, y2, w2, h2) in eyes:
@@ -346,6 +388,8 @@ class CaptureView(View):
 
     def get(self, request, username):
         cap = cv.VideoCapture(0)
+        res = {}
+        duration = 30
         if 'username' not in request.session:
             return JsonResponse({
                 "msg": "You need to login first.",
@@ -353,31 +397,40 @@ class CaptureView(View):
             }, status=200)
 
         store_pth = os.path.join(CAPTURED_PATH, username)
-        count = 1
+
         if cap.isOpened():
             while True:
-                ret, frame = cap.read()
-                if frame is None:
-                    return JsonResponse({
-                        "msg": "No captured frame",
-                        "status": 404
-                    }, status=200)
+                start_time = datetime.now()
+                diff = (datetime.now() - start_time).seconds  # converting into seconds
+                while diff <= duration:
+                    ret, frame = cap.read()
+                    if frame is None:
+                        return JsonResponse({
+                            "msg": "No captured frame",
+                            "status": 404
+                        }, status=200)
 
-                self.detect_and_capture(frame, count, store_pth)
-                count += 1
-                # cv.putText(frame, "press q to exit", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
-                #            (0, 255, 0), 1)
-                cv.imshow('Create dataset', frame)
-                cv.waitKey(1)
-                if count > 50:
-                    break
-            cap.release()
-            cv.destroyAllWindows()
+                    self.detect_and_capture(frame, self.count, store_pth)
 
-            return JsonResponse({
-                "msg": "successfully captured",
-                "status": 301,
-            }, status=200)
+                    # cv.putText(frame, "press q to exit", (20, 20), cv.FONT_HERSHEY_SIMPLEX, 0.65,
+                    #            (0, 255, 0), 1)
+                    cv.imshow('Create dataset', frame)
+                    cv.waitKey(1)
+                    diff = (datetime.now() - start_time).seconds
+                    if self.count > 50:
+                        break
+
+                if self.count < 1:
+                    res['msg'] = 'unable to capture your face. Timeout.'
+                    res['status'] = 22
+
+                cap.release()
+                cv.destroyAllWindows()
+                if res.get('status') != 22:
+                    res['msg'] = 'Successfully captured your face.'
+                    res['status'] = 11
+
+                return JsonResponse(res, status=200)
         else:
             return JsonResponse({
                 "msg": "camera not found, make sure camera is installed on your system",

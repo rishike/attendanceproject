@@ -26,7 +26,7 @@ def visualise_data(embedded, targets):
     plt.close()
 
 
-def Training(username=None):
+def Training():
     res = {}
     try:
         proto_path = os.path.join(settings.BASE_DIR, 'model', 'deploy.prototxt')
@@ -38,11 +38,7 @@ def Training(username=None):
         image_path = os.path.join(settings.BASE_DIR, 'capture')
 
         filenames = []
-        cust_dir = [username, 'unknown']
         for path, subdirs, files in os.walk(image_path):
-            for _ in cust_dir:
-                if _ not in subdirs:
-                    continue
             for name in files:
                 if pathlib.Path(name).suffix in ['.jpg', '.jpeg', '.png']:
                     filenames.append(os.path.join(path, name))

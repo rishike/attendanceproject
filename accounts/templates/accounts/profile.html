@@ -6,6 +6,22 @@
 <!--        <div class="d-flex justify-content-end">-->
 <!--            <button type="button" class="btn btn-primary">Train my image</button>-->
 <!--        </div>-->
+        <div class="row col-md-12 justify-content-center text-center">
+            <div class="col-md-6 col-sm-12">
+                {% if update  %}
+                <input type="hidden" name="updated" value="1" data-href="{{ request.get_full_path }}">
+                <div class="modal fade" id="staticBackdrop"  data-bs-keyboard="true" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-body">
+                      A Profile has been updated.
+                    </div>
+                </div>
+              </div>
+            </div>
+                {% endif %}
+            </div>
+        </div>
 
         <div class="row justify-content-center">
                     <h1 class="text-center">Update Profile</h1>
@@ -13,43 +29,48 @@
                 <form action="" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                <label for="username">Username<span class="link-danger">*</span></label>
-                <input type="text" class="form-control" name="username" aria-describedby="usernameHelp"  id="username">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" name="username" aria-describedby="usernameHelp"  id="username" value="{{ profile_obj.username }}">
                 <p class="text-error text-danger">
                     {% if form.username.errors %}
-                        {{ form.username.errors.as_text }}
+                        {{ form.username.errors }}
                     {% endif %}
                 </p>
             </div>
 
              <div class="form-group">
-                <label for="name">User Full Name<span class="link-danger">*</span></label>
-                <input type="text" class="form-control" name="name" aria-describedby="nameHelp"  id="name">
+                <label for="name">User Full Name</label>
+                <input type="text" class="form-control" name="name" aria-describedby="nameHelp"  id="name" value="{{ profile_obj.name }}">
                 <p class="text-error text-danger">
                     {% if form.name.errors %}
-                        {{ form.name.errors.as_text }}
+                        {{ form.name.errors }}
                     {% endif %}
                 </p>
             </div>
             <div class="form-group">
-                <label for="password">User Password<span class="link-danger">*</span></label>
+                <label for="password">User Password</label>
                 <input type="password" class="form-control" name="password"  id="password" aria-describedby="passwordHelp">
                 <p class="text-error text-danger">
                     {% if form.password.errors %}
-                        {{ form.password.errors.as_text }}
+                        {{ form.password.errors }}
                     {% endif %}
                 </p>
             </div>
             <div class="form-group">
-                <label for="type">User Type<span class="link-danger">*</span></label>
+                <label for="type">User Type</label>
                 <select class="form-control" id="type" name="type">
-                  <option value="">Select User Type</option>
-                  <option value="Admin">Admin</option>
+                    {% if profile_obj.type == 'Admin' %}
+                         <option value="Admin">Admin</option>
                   <option value="Standard User">Standard User</option>
+                    {% else %}
+                      <option value="Standard User">Standard User</option>
+                        <option value="Admin">Admin</option>
+                    {% endif %}
+
             </select>
             <p class="text-error text-danger">
                     {% if form.type.errors %}
-                        {{ form.type.errors.as_text }}
+                        {{ form.type.errors }}
                     {% endif %}
                 </p>
         </div>
@@ -60,4 +81,23 @@
         </div>
     </div>
 
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#staticBackdrop').modal('show');
+        var updated = $('input[name=updated]').val();
+        if (updated != undefined) {
+            href = $('input[name=updated]').attr('data-href');
+            console.log(href)
+            reload(href);
+        }
+        function reload(href) {
+            setTimeout(function(){ window.location.href=href}, 3000);
+        }
+   });
+
+</script>
 {% endblock %}
