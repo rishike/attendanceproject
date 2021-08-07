@@ -11,7 +11,9 @@ import pathlib
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 from matplotlib import rcParams
+from django.conf import settings
 
+SAVE_PATH = os.path.join(settings.STATICFILES_DIRS[0], 'graph')
 
 def visualise_data(embedded, targets):
     X_embedded = TSNE(n_components=2).fit_transform(embedded)
@@ -19,10 +21,10 @@ def visualise_data(embedded, targets):
         idx = targets == t
         plt.scatter(X_embedded[idx, 0], X_embedded[idx, 1], label=t)
 
-    plt.legend(bbox_to_anchor=(1, 1));
+    plt.legend(bbox_to_anchor=(1, 1))
     rcParams.update({'figure.autolayout': True})
     plt.tight_layout()
-    plt.savefig('training.png')
+    plt.savefig(SAVE_PATH + "/" + "training.png")
     plt.close()
 
 

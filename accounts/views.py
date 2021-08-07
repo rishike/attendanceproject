@@ -172,7 +172,7 @@ class LoginView(View):
 
     def get_queryset(self, email, password):
         try:
-            user = Accounts.objects.filter(email=email)
+            user = Accounts.objects.filter(email=email, active=1)
             if not user:
                 return False
             if not check_password(password, user[0].password):
@@ -256,7 +256,7 @@ class AllUserListView(View):
 
     def get_queryset(self):
         try:
-            obj = Accounts.objects.filter(active=True)
+            obj = Accounts.objects.filter()
             return obj
         except Exception:
             return None

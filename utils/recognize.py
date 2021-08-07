@@ -51,9 +51,7 @@ def Recognizer(status=None):
                     predictions = recognizer.predict_proba(vector)[0]
                     j = np.argmax(predictions)
                     probability = predictions[j]
-                    # print(predictions)
-                    # print("------")
-                    # print(label_encoding.classes_[j])
+
                     name = label_encoding.classes_[j]
 
                     if name != 'unknown':
