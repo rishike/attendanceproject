@@ -77,7 +77,7 @@ class MarkAttendanceOutView(View):
                 res['msg'] = "Attendance has already been marked out successfully for " + res['username']
                 return JsonResponse(res, status=200)
             else:
-                res['msg'] = res['username'] + " has not exist in our record."
+                res['msg'] = res['username'] + " need to mark in first."
         return JsonResponse(res, status=200)
 
 
@@ -137,15 +137,32 @@ class AllAttendanceView(View):
     def get(self, request):
         context_data = check_session(request)
         if context_data.get('permission'):
+            final_obj = {}
             all_usr_obj = Accounts.objects.all()
             context_data['total_user'] = all_usr_obj.count()
-            all_atte_obj = {}
+            all_name_join = {_.name: [_.created_at.date(), []] for _ in all_usr_obj}
+            all_diff = {k: NOW.date() - v[0] for k, v in all_name_join.items()}
+            [all_name_join[_.userid.name][1].append([_.created_at.date(), _.marked_at, _.marked_out]) for _ in Attendance.objects.all() ]
 
-            # for obj in all_usr_obj:
-            #     att_obj = Attendance.objects.filter(userid=obj.id)
-            #     present_data = {_.marked_at.date(): [_.marked_at, _.marked_out] for _ in att_obj}
-            #     diff = NOW.date() - obj.created_at.date()
+            for k, v in all_name_join.items():
 
+                final_obj[k] = {}
+                for _ in range(all_diff[k].days):
+                    day = v[0] + timedelta(_)
+                    final_obj[k][_] = {}
+                    final_obj[k][_]['day'] = day
+                    final_obj[k][_]['marked_at'] = "-"
+                    final_obj[k][_]['marked_out'] = "-"
+                    final_obj[k][_]['status'] = 'Absent'
+
+                    for idx in v[1]:
+                        if day == idx[0]:
+                            final_obj[k][_]['day'] = day
+                            final_obj[k][_]['marked_at'] = idx[1]
+                            final_obj[k][_]['marked_out'] = idx[2]
+                            final_obj[k][_]['status'] = 'Present'
+
+            context_data['final_obj'] = final_obj
             return render(request, template_name=self.template_name, context=context_data)
         return render(request, template_name='403.html')
 
@@ -193,6 +210,7 @@ class AttendanceListView(View):
                 atte_dict[_]['status'] = 'Present'
 
         context_data['atte_obj'] = atte_dict
+        context_data['name'] = user_obj.name
 
         return render(request, self.template_name, context_data)
 

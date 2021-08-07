@@ -48,12 +48,14 @@
                 username = $('input[name=uploader]').val();
 
                 $("#camera_captured").click(function() {
+                        document.getElementById("camera_captured").disabled=true;
                         let url = "http://127.0.0.1:8000/accounts/capture/"+username+"/";
                         fetch(url,  {
                             method : 'get',
                          }).then(response => response.json())
                          .then(data => {
                                alert(data['msg']);
+                                document.getElementById("camera_captured").disabled=false;
                          });
                 });
 
@@ -92,6 +94,7 @@
                         beforeSend: function() {
                             alertBox.innerHTML= "";
                             imageBox.innerHTML = "";
+                            uploadButton.disabled = true;
                         },
                         xhr: function() {
                         const xhr = new window.XMLHttpRequest();
@@ -110,6 +113,7 @@
                         success: function(response) {
                               alert(response['message']);
                               uploadForm.reset();
+                              uploadButton.disabled = false;
                         },
                         error: function(error) {
                             alertBox.innerHTML = `<div class="alert alert-danger" role="alert">

@@ -69,11 +69,13 @@
 <script>
     $(document).ready(function() {
          $("#mark-my-attd").click(function() {
+             document.getElementById('mark-my-attd').disabled=true;
              let url = "http://127.0.0.1:8000/markattendance/"
                 fetch(url,  {
                     method : 'get',
                  }).then(response => response.json())
                  .then(data => {
+                        document.getElementById('mark-my-attd').disabled=false;
                         if (data['status'] == 00) { alert('camera not found'); location.reload();  }
                         if (data['status'] == 10) { alert('Application has been closed'); location.reload();  }
                         if (data['status'] == 11) { alert(data['msg']); location.reload();  }
@@ -81,11 +83,13 @@
          });
 
          $("#mark-out-attd").click(function() {
+            document.getElementById('mark-out-attd').disabled=true;
              let url = "http://127.0.0.1:8000/markoutattendance/"
                 fetch(url,  {
                     method : 'get',
                  }).then(response => response.json())
                  .then(data => {
+                        document.getElementById('mark-out-attd').disabled=false;
                         if (data['status'] == 00) { alert('camera not found'); location.reload();  }
                         if (data['status'] == 10) { alert('Application has been closed'); location.reload();  }
                         if (data['status'] == 11) { alert(data['msg']); location.reload();  }

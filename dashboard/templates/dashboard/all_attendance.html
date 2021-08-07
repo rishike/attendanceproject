@@ -27,7 +27,6 @@
                     <tr>
                         <th scope="col">Day</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Department</th>
                         <th scope="col">Marked In</th>
                         <th scope="col">Marked Out</th>
                         <th scope="col">Status</th>
@@ -35,15 +34,16 @@
                 </thead>
                 <tbody>
 
-                    {% for obj in all_atte_obj.values %}
+                    {% for k,v in final_obj.items %}
+                    {% for obj in v.values %}
                      <tr>
                         <th scope="row">{{ obj.day }}</th>
-                        <td>{{ full_name }}</td>
-                        <td>Standard User</td>
+                        <td>{{ k }}</td>
                         <td><b>{{ obj.marked_at }}</b></td>
                         <td><b>{{ obj.marked_out }}</b></td>
                         <td class="lead">{{ obj.status }}</td>
                     </tr>
+                    {% endfor %}
                     {% empty %}
                     <tr class="mt-5">
                         <td colspan="7" align="center">

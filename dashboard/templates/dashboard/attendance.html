@@ -58,7 +58,6 @@
                     <tr>
                         <th scope="col">Day</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Department</th>
                         <th scope="col">Marked In</th>
                         <th scope="col">Marked Out</th>
                         <th scope="col">Status</th>
@@ -69,8 +68,7 @@
                     {% for obj in atte_obj.values %}
                      <tr>
                         <th scope="row">{{ obj.day }}</th>
-                        <td></td>
-                        <td>Standard User</td>
+                        <td>{{ name }}</td>
                         <td><b>{{ obj.marked_at }}</b></td>
                         <td><b>{{ obj.marked_out }}</b></td>
                         <td class="lead">{{ obj.status }}</td>
