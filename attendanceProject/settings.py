@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'attendanceProject.urls'
@@ -136,11 +138,11 @@ PROTO_PATH = os.path.join(BASE_DIR, "model", "deploy.prototxt")
 CAFFE_MODEL_PATH = os.path.join(BASE_DIR, "model", "res10_300x300_ssd_iter_140000.caffemodel")
 RECOGNITION_MODEL = os.path.join(BASE_DIR, "model", 'openface_nn4.small2.v1.t7')
 
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 #
 # DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 
 # Configure Django App for Heroku.
 # import django_heroku
-# django_heroku.settings(locals())
+django_heroku.settings(locals())
