@@ -76,12 +76,7 @@ WSGI_APPLICATION = 'attendanceProject.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'attendance',
-        'USER': 'root',
-        'PASSWORD': ''
-    }
+    'default': os.environ['CLEARDB_DATABASE_URL']
 }
 
 # Password validation
