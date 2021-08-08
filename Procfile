@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn attendanceProject.wsgi --log-file -
+web: waitress-serve --port=$PORT attendanceProject.wsgi:application
