@@ -103,10 +103,10 @@ def Training():
         recognizer_path = os.path.join(settings.BASE_DIR, 'train', 'recognizer.pickle')
         le_path = os.path.join(settings.BASE_DIR, 'train', 'le.pickle')
 
-        with open(recognizer_path, "ab+") as fp:
+        with open(recognizer_path, "wb") as fp:
             fp.write(pickle.dumps(recognizer))
 
-        with open(le_path, "ab+") as fp:
+        with open(le_path, "wb") as fp:
             fp.write(pickle.dumps(le))
 
         res['status'] = 11
