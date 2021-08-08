@@ -13,7 +13,7 @@ import os
 import pathlib
 from datetime import datetime, timedelta, timezone
 
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now()
 START_DATE = datetime(NOW.year, NOW.month, NOW.day, hour=00, minute=00, second=00)
 END_DATE = datetime(NOW.year, NOW.month, NOW.day, hour=23, minute=59, second=59)
 
