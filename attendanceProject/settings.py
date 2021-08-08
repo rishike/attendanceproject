@@ -136,3 +136,11 @@ CORS_ORIGIN_ALLOW_ALL = True
 PROTO_PATH = os.path.join(BASE_DIR, "model", "deploy.prototxt")
 CAFFE_MODEL_PATH = os.path.join(BASE_DIR, "model", "res10_300x300_ssd_iter_140000.caffemodel")
 RECOGNITION_MODEL = os.path.join(BASE_DIR, "model", 'openface_nn4.small2.v1.t7')
+
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#
+# DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+
+# Configure Django App for Heroku.
+import django_heroku
+django_heroku.settings(locals())

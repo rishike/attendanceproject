@@ -256,7 +256,7 @@ class AllUserListView(View):
 
     def get_queryset(self):
         try:
-            obj = Accounts.objects.filter()
+            obj = Accounts.objects.filter(active=True)
             return obj
         except Exception:
             return None

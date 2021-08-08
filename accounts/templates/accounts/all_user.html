@@ -37,11 +37,13 @@
                             <a href="{% url 'accounts:profile' pk=obj.id  %}" class="btn btn-sm btn-success" title="Edit Profile">
                                   <i class="fa fa-pen"></i>
                             </a>
+                            {% if obj.username != username %}
                             <button type="button" class="btn btn-sm btn-danger del-id"
                                data-id="{{ obj.id }}"
                                title="Delete Profile">
                                   <i class="fa fa-trash" aria-hidden="true"></i>
                             </button>
+                            {% endif %}
                             <a href="{% url 'accounts:dataset' pk=obj.id  %}" class="btn btn-sm btn-success" title="Upload Dataset">
                                 <i class="fa fa-upload" aria-hidden="true"></i>
                             </a>

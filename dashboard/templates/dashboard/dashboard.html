@@ -70,7 +70,7 @@
     $(document).ready(function() {
          $("#mark-my-attd").click(function() {
              document.getElementById('mark-my-attd').disabled=true;
-             let url = "http://127.0.0.1:8000/markattendance/"
+             let url = "http://127.0.0.1:8000/markattendance/";
                 fetch(url,  {
                     method : 'get',
                  }).then(response => response.json())
@@ -84,7 +84,7 @@
 
          $("#mark-out-attd").click(function() {
             document.getElementById('mark-out-attd').disabled=true;
-             let url = "http://127.0.0.1:8000/markoutattendance/"
+             let url = "http://127.0.0.1:8000/markoutattendance/";
                 fetch(url,  {
                     method : 'get',
                  }).then(response => response.json())

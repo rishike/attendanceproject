@@ -108,7 +108,10 @@ class MarkAttendanceView(View):
     def get(self, request):
         res = Recognizer(status='in')
         if res.get('status') == 11:
-            user = Accounts.objects.filter(username=res['username'])
+            user = Accounts.objects.filter(username=res['username'], active=1)
+            if not user:
+                res['msg'] = "sorry that users does not exist."
+                return JsonResponse(res, status=200)
 
             if Attendance.objects.filter(userid_id=user[0].id, marked_at__gte=START_DATE, marked_at__lte=END_DATE):
                 res['msg'] = "Attendance has already been marked successfully for " + res['username']
